@@ -12,7 +12,7 @@
   <meta name="keywords" content="创维电视,AVC,奥维云网,市场分析,市占率,电视零售监测,南部战区,26W27,Q7H">
   <meta name="author" content="创维南部战区">
 
-  <!-- Open Graph / Facebook / WeChat / Feishu -->
+  <!-- Open Graph / Facebook / WeChat / Feishu / DingTalk -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://zuoshou2001.github.io/avc-26w27-dashboard/">
   <meta property="og:title" content="南部战区 AVC 周度市场分析看板 | 创维电视 26W27">
@@ -30,22 +30,133 @@
   <meta property="twitter:description" content="品牌竞争格局 · 市占率概览 · 98吋+百吋分析 · TOP20型号 · 尺寸段分析 · Q7H对比">
   <meta property="twitter:image" content="https://zuoshou2001.github.io/avc-26w27-dashboard/assets/og-image.jpg">
 
+  <!-- WeChat / WeCom 微信 -->
+  <meta itemprop="name" content="南部战区 AVC 周度市场分析看板 | 创维电视 26W27">
+  <meta itemprop="description" content="品牌竞争格局 · 市占率概览 · 98吋+百吋分析 · TOP20型号 · 尺寸段分析 · Q7H对比">
+  <meta itemprop="image" content="https://zuoshou2001.github.io/avc-26w27-dashboard/assets/og-image.jpg">
+
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a1a2e'/><text x='50' y='68' text-anchor='middle' font-size='55' font-weight='bold' fill='%23e63946'>26</text></svg>">
 
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #1a1a2e; color: #fff; }
-    .wrap { text-align: center; }
-    h1 { font-size: 1.6rem; margin-bottom: 8px; }
-    p { color: rgba(255,255,255,0.6); font-size: 0.9rem; }
-    a { color: #e63946; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; margin: 0;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #fff;
+    }
+    .card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 520px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      animation: fadeIn 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 14px;
+      background: #e63946;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+    .card h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1.4;
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+    }
+    .card .subtitle {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 28px;
+    }
+    .card .modules {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+      margin-bottom: 32px;
+    }
+    .card .modules span {
+      display: inline-block;
+      padding: 5px 14px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.75);
+      font-weight: 500;
+    }
+    .card .modules span.highlight {
+      background: rgba(230,57,70,0.2);
+      border-color: rgba(230,57,70,0.3);
+      color: #e63946;
+    }
+    .card .link-area {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.35);
+      word-break: break-all;
+      margin-bottom: 20px;
+    }
+    .card .link-area a {
+      color: #e63946;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.82rem;
+    }
+    .card .link-area a:hover {
+      text-decoration: underline;
+    }
+    .card .footer {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.25);
+    }
+    .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #16a34a; animation: pulse 1.5s infinite; margin-right: 6px; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>南部战区 AVC 周度市场分析看板</h1>
-    <p>创维电视 · 26W27 · 正在跳转...</p>
-    <p><a href="avc-26w27-dashboard.html">直接进入看板</a></p>
+  <div class="card">
+    <span class="badge">Skyworth · 南部战区</span>
+    <h1>AVC 周度市场分析看板</h1>
+    <p class="subtitle">26W27 &nbsp;·&nbsp; 06.29 - 07.05 &nbsp;·&nbsp; 同期对比 25W27</p>
+
+    <div class="modules">
+      <span class="highlight">品牌格局</span>
+      <span>市占率</span>
+      <span>98吋+</span>
+      <span>TOP20</span>
+      <span>尺寸分析</span>
+      <span>Q7H对比</span>
+    </div>
+
+    <div class="link-area">
+      <span class="dot"></span> 正在跳转至看板...
+      <br><a href="avc-26w27-dashboard.html">avc-26w27-dashboard.html</a>
+    </div>
+
+    <p class="footer">数据来源：AVC零售监测 &nbsp;|&nbsp; 创维电视</p>
   </div>
 </body>
 </html>
