@@ -228,6 +228,16 @@ footer {
     <option value="26W02">26W02</option>
     <option value="26W01">26W01</option>
   </select>
+  <select id="month-selector" style="margin-left:auto;display:none">
+    <option value="7月" selected>7月</option>
+    <option value="6月">6月</option>
+    <option value="5月">5月</option>
+    <option value="4月">4月</option>
+    <option value="3月">3月</option>
+    <option value="2月">2月</option>
+    <option value="1月">1月</option>
+  </select>
+  <button id="mode-toggle" style="margin-left:6px;padding:4px 12px;font-size:0.78rem;font-weight:600;border:1px solid var(--rule);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer;white-space:nowrap">月度</button>
 </nav>
 
 <div class="header">
@@ -237,9 +247,9 @@ footer {
       <p class="sub">创维电视 · 数据来源：AVC零售监测</p>
     </div>
     <div class="meta">
-      <span class="week">26W27</span>
-      06.29 - 07.05
-      <br>同期对比：25W27
+      <span class="week" id="header-week">26W27</span>
+      <span id="header-date">06.29 - 07.05</span>
+      <br>同期对比：<span id="header-yoy-ref">25W27</span>
     </div>
   </div>
 </div>
@@ -250,28 +260,28 @@ footer {
 <div class="kpi-grid">
   <div class="kpi-card blue">
     <div class="label">创维销额</div>
-    <div class="value">541.3<span class="delta down">万</span></div>
-    <div class="sub">行业 2200.6万 · 排名第2</div>
+    <div class="value" id="kpi-cw">541.3<span class="delta down">万</span></div>
+    <div class="sub">行业 <span id="kpi-hy">2200.6万</span> · 排名第2</div>
   </div>
   <div class="kpi-card accent">
     <div class="label">市占率</div>
-    <div class="value">24.6%</div>
-    <div class="sub">同期 23.3% · 同比 +1.3pp</div>
+    <div class="value" id="kpi-ms">24.6%</div>
+    <div class="sub">同期 <span id="kpi-ms-25">23.3%</span> · 同比 <span id="kpi-yoy">+1.3%</span></div>
   </div>
   <div class="kpi-card green">
     <div class="label">目标达成</div>
-    <div class="value">100.8%</div>
+    <div class="value" id="kpi-achieve">100.8%</div>
     <div class="sub">目标 24.4% · 超额完成</div>
   </div>
   <div class="kpi-card orange">
     <div class="label">vs 海信差距</div>
-    <div class="value">-177.6<span class="delta down">万</span></div>
-    <div class="sub">海信 718.9万 · TCL 459.4万</div>
+    <div class="value" id="kpi-gap">-177.6<span class="delta down">万</span></div>
+    <div class="sub">海信 <span id="kpi-hx">718.9万</span> · TCL <span id="kpi-tcl">459.4万</span></div>
   </div>
-  <div class="kpi-card purple">
+  <div class="kpi-card purple" id="kpi-q7h-card">
     <div class="label">Q7H vs U7S-PRO</div>
-    <div class="value">44 : 15</div>
-    <div class="sub">控比 2.9x · 销额 41.2万 vs 27.2万</div>
+    <div class="value" id="kpi-q7h">44 : 15</div>
+    <div class="sub" id="kpi-q7h-sub">控比 2.9x · 销额 41.2万 vs 27.2万</div>
   </div>
 </div>
 
@@ -511,7 +521,7 @@ footer {
 </footer>
 
 <script src="assets/echarts.min.js"></script>
-<script src="assets/dashboard_data.js"></script>
+<script src="assets/all_data.js"></script>
 <script>
 // Scroll spy for nav
 (function() {
