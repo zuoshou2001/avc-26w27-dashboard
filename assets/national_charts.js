@@ -489,6 +489,382 @@
     }
   }
 
+  // ===== SECTION 5: 尺寸分析 =====
+  function renderSizeCumulative() {
+    var el = document.getElementById('chart-size-cumulative');
+    if (!el) return;
+    // Aggregate size data across all weeks
+    var sizeMap = {};
+    DASHBOARD_ALL.allWeeks.forEach(function(w) {
+      var d = getWeekData(w);
+      if (d && d.sizeList) {
+        d.sizeList.forEach(function(s) {
+          if (!sizeMap[s.size]) sizeMap[s.size] = { cw: 0, hx: 0, tcl: 0, total: 0 };
+        });
+      }
+      if (d && d.brandOverview) {
+        // We need per-size brand data. Use d.sizeSegs and shares
+        if (d.sizeSegs && d.cwShares && d.hxShares && d.tclShares) {
+          d.sizeSegs.forEach(function(seg, i) {
+            if (!sizeMap[seg]) sizeMap[seg] = { cw: 0, hx: 0, tcl: 0, total: 0 };
+          });
+        }
+      }
+    });
+    // Use the latest week's size data plus aggregate from all weeks
+    var latestWeek = DASHBOARD_ALL.allWeeks[DASHBOARD_ALL.allWeeks.length - 1];
+    var latestD = getWeekData(latestWeek);
+    if (latestD && latestD.sizeList && latestD.sizeSegs) {
+      // Aggregate from all weeks by summing sizeList amounts
+      var segAmounts = {};
+      DASHBOARD_ALL.allWeeks.forEach(function(w) {
+        var d = getWeekData(w);
+        if (d && d.sizeList) {
+          d.sizeList.forEach(function(s) {
+            if (!segAmounts[s.size]) segAmounts[s.size] = 0;
+            segAmounts[s.size] += s.amount || 0;
+          });
+        }
+      });
+      var segs = Object.keys(segAmounts).sort(function(a, b) { return segAmounts[b] - segAmounts[a]; }).slice(0, 8);
+      var labels = segs;
+      var vals = segs.map(function(s) { return +segAmounts[s].toFixed(1); });
+
+      var chart = echarts.init(el, null, { renderer: 'svg' });
+      chart.setOption({
+        animation: false, tooltip: { trigger: 'axis', appendToBody: true },
+        grid: { left: '3%', right: '4%', bottom: '10%', top: '8%', containLabel: true },
+        xAxis: { type: 'category', data: labels, axisLabel: { color: ink, fontSize: 10, rotate: 30 } },
+        yAxis: { type: 'value', name: '万', axisLabel: { color: muted, fontSize: 9 }, splitLine: { lineStyle: { color: rule } } },
+        series: [{
+          type: 'bar', data: vals, barWidth: '55%',
+          itemStyle: { borderRadius: [4,4,0,0], color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:accent},{offset:1,color:'#16213e'}]) },
+          label: { show: true, position: 'top', color: ink, fontSize: 9, formatter: '{c}万' }
+        }]
+      });
+      allCharts.push(chart);
+    }
+  }
+
+  function renderSizeShare() {
+    var el = document.getElementById('chart-size-share');
+    if (!el) return;
+    var segSizes = ['80吋+', '75-77吋', '65吋', '55吋及以下'];
+    // Aggregate brand shares per size segment across all weeks
+    var segShareMap = {};
+    segSizes.forEach(function(seg) { segShareMap[seg] = { cw: 0, hx: 0, tcl: 0, other: 0, total: 0 }; });
+
+    DASHBOARD_ALL.allWeeks.forEach(function(w) {
+      var d = getWeekData(w);
+      if (d && d.sizeSegs) {
+        d.sizeSegs.forEach(function(seg, i) {
+          if (segShareMap[seg]) {
+            // We need to convert shares back to approximate amounts
+            // Use sizeList to get total amount per segment
+            var totalAmt = 0;
+            if (d.sizeList) {
+              var found = d.sizeList.filter(function(s) { return s.size === seg; })[0];
+              if (found) totalAmt = found.amount;
+            }
+            var cwAmt = totalAmt * (d.cwShares[i] || 0) / 100;
+            var hxAmt = totalAmt * (d.hxShares[i] || 0) / 100;
+            var tclAmt = totalAmt * (d.tclShares[i] || 0) / 100;
+            var otherAmt = totalAmt - cwAmt - hxAmt - tclAmt;
+            if (otherAmt < 0) otherAmt = 0;
+            segShareMap[seg].cw += cwAmt;
+            segShareMap[seg].hx += hxAmt;
+            segShareMap[seg].tcl += tclAmt;
+            segShareMap[seg].other += otherAmt;
+            segShareMap[seg].total += totalAmt;
+          }
+        });
+      }
+    });
+
+    var shareData = segSizes.map(function(seg) {
+      var m = segShareMap[seg];
+      var t = m.total || 1;
+      return {
+        name: seg,
+        cw: +(m.cw / t * 100).toFixed(1),
+        hx: +(m.hx / t * 100).toFixed(1),
+        tcl: +(m.tcl / t * 100).toFixed(1),
+        other: +(m.other / t * 100).toFixed(1)
+      };
+    });
+
+    var chart = echarts.init(el, null, { renderer: 'svg' });
+    chart.setOption({
+      animation: false, tooltip: { trigger: 'axis', appendToBody: true, formatter: function(p) { return p.map(function(i) { return i.seriesName + ': ' + i.value + '%'; }).join('<br>'); } },
+      legend: { data: ['创维', '海信', 'TCL', '其他'], bottom: 0, textStyle: { color: ink, fontSize: 10 } },
+      grid: { left: '3%', right: '4%', bottom: '12%', top: '8%', containLabel: true },
+      xAxis: { type: 'category', data: segSizes, axisLabel: { color: ink, fontSize: 10 } },
+      yAxis: { type: 'value', name: '%', max: 100, axisLabel: { color: muted, fontSize: 9 }, splitLine: { lineStyle: { color: rule } } },
+      color: [accent, orange, blue, '#94a3b8'],
+      series: [
+        { name: '创维', type: 'bar', stack: 'total', data: shareData.map(function(d) { return d.cw; }), barWidth: '50%', label: { show: true, fontSize: 9, formatter: function(p) { return p.value > 8 ? p.value + '%' : ''; } } },
+        { name: '海信', type: 'bar', stack: 'total', data: shareData.map(function(d) { return d.hx; }), label: { show: true, fontSize: 9, formatter: function(p) { return p.value > 8 ? p.value + '%' : ''; } } },
+        { name: 'TCL', type: 'bar', stack: 'total', data: shareData.map(function(d) { return d.tcl; }), label: { show: true, fontSize: 9, formatter: function(p) { return p.value > 8 ? p.value + '%' : ''; } } },
+        { name: '其他', type: 'bar', stack: 'total', data: shareData.map(function(d) { return d.other; }) }
+      ]
+    });
+    allCharts.push(chart);
+  }
+
+  function renderBranchSizeTable() {
+    var tbody = document.getElementById('table-branch-size-body');
+    if (!tbody) return;
+    var segSizes = ['80吋+', '75-77吋', '65吋', '55吋及以下'];
+
+    // Aggregate per-branch size segment shares
+    var branchSizeData = [];
+    BRANCHES.forEach(function(b) {
+      var segShares = {};
+      segSizes.forEach(function(seg) { segShares[seg] = { cw: 0, total: 0 }; });
+
+      DASHBOARD_ALL.allWeeks.forEach(function(w) {
+        var d = getBranchWeekData(w, b);
+        if (d && d.sizeSegs) {
+          d.sizeSegs.forEach(function(seg, i) {
+            if (segShares[seg] !== undefined) {
+              var totalAmt = 0;
+              if (d.sizeList) {
+                var found = d.sizeList.filter(function(s) { return s.size === seg; })[0];
+                if (found) totalAmt = found.amount;
+              }
+              var cwAmt = totalAmt * (d.cwShares[i] || 0) / 100;
+              segShares[seg].cw += cwAmt;
+              segShares[seg].total += totalAmt;
+            }
+          });
+        }
+      });
+
+      var bestSeg = '', bestShare = 0;
+      var shares = {};
+      segSizes.forEach(function(seg) {
+        var s = segShares[seg];
+        var share = s.total > 0 ? +(s.cw / s.total * 100).toFixed(1) : 0;
+        shares[seg] = share;
+        if (share > bestShare) { bestShare = share; bestSeg = seg; }
+      });
+
+      branchSizeData.push({
+        branch: b,
+        s80: shares['80吋+'] || 0,
+        s75: shares['75-77吋'] || 0,
+        s65: shares['65吋'] || 0,
+        s55: shares['55吋及以下'] || 0,
+        bestSeg: bestSeg,
+        bestShare: bestShare
+      });
+    });
+    branchSizeData.sort(function(a, b) { return b.s80 - a.s80; });
+
+    var html = '';
+    branchSizeData.forEach(function(d) {
+      html += '<tr><td><b>' + d.branch + '</b></td>';
+      html += '<td class="num">' + d.s80 + '%</td>';
+      html += '<td class="num">' + d.s75 + '%</td>';
+      html += '<td class="num">' + d.s65 + '%</td>';
+      html += '<td class="num">' + d.s55 + '%</td>';
+      html += '<td class="num"><b>' + d.bestSeg + '</b></td>';
+      html += '<td class="num"><span class="tag tag-green">' + d.bestShare + '%</span></td></tr>';
+    });
+    tbody.innerHTML = html;
+  }
+
+  function renderSizeInsight() {
+    // Find best size segment for 创维 in southern all
+    var segSizes = ['80吋+', '75-77吋', '65吋', '55吋及以下'];
+    var totalSegShares = {};
+    segSizes.forEach(function(seg) { totalSegShares[seg] = { cw: 0, total: 0 }; });
+
+    DASHBOARD_ALL.allWeeks.forEach(function(w) {
+      var d = getWeekData(w);
+      if (d && d.sizeSegs) {
+        d.sizeSegs.forEach(function(seg, i) {
+          if (totalSegShares[seg] !== undefined) {
+            var totalAmt = 0;
+            if (d.sizeList) {
+              var found = d.sizeList.filter(function(s) { return s.size === seg; })[0];
+              if (found) totalAmt = found.amount;
+            }
+            totalSegShares[seg].cw += totalAmt * (d.cwShares[i] || 0) / 100;
+            totalSegShares[seg].total += totalAmt;
+          }
+        });
+      }
+    });
+
+    var bestSeg = '', bestShare = 0, worstSeg = '', worstShare = 100;
+    segSizes.forEach(function(seg) {
+      var s = totalSegShares[seg];
+      var share = s.total > 0 ? s.cw / s.total * 100 : 0;
+      if (share > bestShare) { bestShare = share; bestSeg = seg; }
+      if (share < worstShare && share > 0) { worstShare = share; worstSeg = seg; }
+    });
+
+    var text = '年度累计尺寸段分析：创维在' + bestSeg + '份额' + bestShare.toFixed(1) + '%表现最佳，在' + worstSeg + '份额' + worstShare.toFixed(1) + '%最弱。';
+    // Find branch with strongest 80+
+    var bestBranch80 = '', best80Share = 0;
+    BRANCHES.forEach(function(b) {
+      var cw80 = 0, total80 = 0;
+      DASHBOARD_ALL.allWeeks.forEach(function(w) {
+        var d = getBranchWeekData(w, b);
+        if (d && d.sizeSegs) {
+          var idx = d.sizeSegs.indexOf('80吋+');
+          if (idx >= 0 && d.cwShares[idx] !== undefined) {
+            var totalAmt = 0;
+            if (d.sizeList) {
+              var found = d.sizeList.filter(function(s) { return s.size === '80吋+'; })[0];
+              if (found) totalAmt = found.amount;
+            }
+            cw80 += totalAmt * d.cwShares[idx] / 100;
+            total80 += totalAmt;
+          }
+        }
+      });
+      var share = total80 > 0 ? cw80 / total80 * 100 : 0;
+      if (share > best80Share) { best80Share = share; bestBranch80 = b; }
+    });
+    text += ' 80吋+大屏市场' + bestBranch80 + '分公司份额' + best80Share.toFixed(1) + '%领先。';
+    var el = document.getElementById('insight-size-text');
+    if (el) el.textContent = text;
+  }
+
+  // ===== SECTION 6: 分公司型号分析 =====
+  function renderBranchModelAnalysis() {
+    // Update badge
+    var badge = document.getElementById('sec6-badge');
+    if (badge) badge.textContent = '26W01-26W27 累计';
+
+    // Update title
+    var title = document.getElementById('branch-top10-title');
+    if (title) title.textContent = (currentBranch === '南部全部' ? '南部全部' : currentBranch) + ' · 全品牌年度TOP10';
+
+    var title5 = document.getElementById('branch-top5-title');
+    if (title5) title5.textContent = (currentBranch === '南部全部' ? '南部全部' : currentBranch) + ' · 创维年度TOP5';
+
+    // Aggregate product data from all weeks
+    var allProductMap = {};
+    var branchProductMap = {};
+
+    DASHBOARD_ALL.allWeeks.forEach(function(w) {
+      var d = getWeekData(w);
+      if (d && d.top20) {
+        d.top20.forEach(function(r) {
+          var key = r.brand + '|' + r.model;
+          if (!allProductMap[key]) {
+            allProductMap[key] = { brand: r.brand, model: r.model, sales: 0, amount: 0, weeks: 0, prices: [] };
+          }
+          allProductMap[key].sales += r.sales || 0;
+          allProductMap[key].amount += r.amount || 0;
+          allProductMap[key].weeks += 1;
+          if (r.avg_price) allProductMap[key].prices.push(r.avg_price);
+        });
+      }
+      if (currentBranch !== '南部全部') {
+        var bd = getBranchWeekData(w, currentBranch);
+        if (bd && bd.top20) {
+          bd.top20.forEach(function(r) {
+            var key = r.brand + '|' + r.model;
+            if (!branchProductMap[key]) {
+              branchProductMap[key] = { brand: r.brand, model: r.model, sales: 0, amount: 0, weeks: 0, prices: [] };
+            }
+            branchProductMap[key].sales += r.sales || 0;
+            branchProductMap[key].amount += r.amount || 0;
+            branchProductMap[key].weeks += 1;
+            if (r.avg_price) branchProductMap[key].prices.push(r.avg_price);
+          });
+        }
+      }
+    });
+
+    function toProducts(map) {
+      return Object.keys(map).map(function(k) {
+        var p = map[k];
+        var avgPrice = p.prices.length > 0 ? Math.round(p.prices.reduce(function(s, v) { return s + v; }, 0) / p.prices.length) : (p.sales > 0 ? Math.round(p.amount * 10000 / p.sales) : 0);
+        return { brand: p.brand, model: p.model, sales: p.sales, amount: +p.amount.toFixed(2), weeks: p.weeks, avgPrice: avgPrice };
+      }).sort(function(a, b) { return b.amount - a.amount; });
+    }
+
+    var allProducts = toProducts(allProductMap);
+    var branchProducts = currentBranch === '南部全部' ? allProducts : toProducts(branchProductMap);
+
+    // 南部全部 创维TOP5
+    var allCwTop5 = allProducts.filter(function(p) { return p.brand === '创维'; }).slice(0, 5);
+    var tbodyAllCw = document.getElementById('table-all-cw-top5-body');
+    if (tbodyAllCw) {
+      var html = '';
+      allCwTop5.forEach(function(r, i) {
+        var rc = i < 3 ? 'rd-' + (i + 1) : 'rd-o';
+        html += '<tr><td class="rank"><span class="rank-dot ' + rc + '">' + (i+1) + '</span></td>';
+        html += '<td>' + r.model + '</td><td class="num">' + r.sales.toLocaleString() + '</td>';
+        html += '<td class="num">' + r.amount + '万</td><td class="num">¥' + r.avgPrice.toLocaleString() + '</td></tr>';
+      });
+      tbodyAllCw.innerHTML = html;
+    }
+
+    // 分公司 创维TOP5
+    var brCwTop5 = branchProducts.filter(function(p) { return p.brand === '创维'; }).slice(0, 5);
+    var tbodyBrCw = document.getElementById('table-br-cw-top5-body');
+    if (tbodyBrCw) {
+      var html = '';
+      if (brCwTop5.length === 0) {
+        html = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px">暂无数据</td></tr>';
+      } else {
+        brCwTop5.forEach(function(r, i) {
+          var rc = i < 3 ? 'rd-' + (i + 1) : 'rd-o';
+          html += '<tr><td class="rank"><span class="rank-dot ' + rc + '">' + (i+1) + '</span></td>';
+          html += '<td>' + r.model + '</td><td class="num">' + r.sales.toLocaleString() + '</td>';
+          html += '<td class="num">' + r.amount + '万</td><td class="num">¥' + r.avgPrice.toLocaleString() + '</td></tr>';
+        });
+      }
+      tbodyBrCw.innerHTML = html;
+    }
+
+    // 分公司全品牌TOP10
+    var brTop10 = branchProducts.slice(0, 10);
+    var tbodyBrTop10 = document.getElementById('table-branch-top10-body');
+    if (tbodyBrTop10) {
+      var html = '';
+      if (brTop10.length === 0) {
+        html = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:12px">暂无数据</td></tr>';
+      } else {
+        brTop10.forEach(function(r, i) {
+          var rc = i < 3 ? 'rd-' + (i + 1) : 'rd-o';
+          html += '<tr><td class="rank"><span class="rank-dot ' + rc + '">' + (i+1) + '</span></td>';
+          html += '<td>' + r.brand + '</td><td>' + r.model + '</td>';
+          html += '<td class="num">' + r.sales.toLocaleString() + '</td>';
+          html += '<td class="num">' + r.amount + '万</td>';
+          html += '<td class="num">¥' + r.avgPrice.toLocaleString() + '</td>';
+          html += '<td class="num">' + r.weeks + '周</td></tr>';
+        });
+      }
+      tbodyBrTop10.innerHTML = html;
+    }
+
+    // Insight
+    var insightEl = document.getElementById('insight-branch-model-text');
+    if (insightEl) {
+      var text = '';
+      if (currentBranch === '南部全部') {
+        text = '南部全部年度创维TOP1型号为' + (allCwTop5.length > 0 ? allCwTop5[0].model : '--') + '，';
+        text += '累计销额' + (allCwTop5.length > 0 ? allCwTop5[0].amount + '万' : '--') + '。';
+        text += '全品牌TOP1为' + (allProducts.length > 0 ? allProducts[0].brand + ' ' + allProducts[0].model : '--') + '。';
+      } else {
+        text = currentBranch + '分公司年度创维TOP1型号为' + (brCwTop5.length > 0 ? brCwTop5[0].model : '--') + '，';
+        text += '累计销额' + (brCwTop5.length > 0 ? brCwTop5[0].amount + '万' : '--') + '。';
+        if (brCwTop5.length > 0 && allCwTop5.length > 0) {
+          text += '南部全部TOP1为' + allCwTop5[0].model + '（' + allCwTop5[0].amount + '万），';
+          text += (brCwTop5[0].model === allCwTop5[0].model ? '与南部一致。' : '与南部不同，分公司特色型号突出。');
+        }
+      }
+      insightEl.textContent = text;
+    }
+  }
+
   // ===== MAIN =====
   function renderAll() {
     allCharts.forEach(function(c) { c.dispose(); });
@@ -505,6 +881,11 @@
     renderBrandCumulative();
     renderBrandInsight();
     renderProductAnalysis();
+    renderSizeCumulative();
+    renderSizeShare();
+    renderBranchSizeTable();
+    renderSizeInsight();
+    renderBranchModelAnalysis();
   }
 
   var branchSelect = document.getElementById('compare-branch');

@@ -132,6 +132,10 @@ footer { padding: 20px; font-size: 0.76rem; color: var(--muted); text-align: cen
   <a href="#sec3">品牌竞争</a>
   <span class="nav-sep">|</span>
   <a href="#sec4">产品分析</a>
+  <span class="nav-sep">|</span>
+  <a href="#sec5">尺寸分析</a>
+  <span class="nav-sep">|</span>
+  <a href="#sec6">分公司型号</a>
   <a href="avc-26w27-dashboard.html" style="color:var(--accent);font-weight:700;background:#fef2f2;padding:3px 8px;border-radius:4px;margin-left:8px;font-size:0.72rem">南部战区 →</a>
   <select id="compare-branch" style="margin-left:auto">
     <option value="南部全部">南部全部</option>
@@ -200,6 +204,8 @@ footer { padding: 20px; font-size: 0.76rem; color: var(--muted); text-align: cen
   <a href="#sec2" style="display:inline-block;margin:0 12px;color:var(--ink);font-weight:600;font-size:0.85rem;text-decoration:none">🏢 分公司排名</a>
   <a href="#sec3" style="display:inline-block;margin:0 12px;color:var(--ink);font-weight:600;font-size:0.85rem;text-decoration:none">🏆 品牌竞争</a>
   <a href="#sec4" style="display:inline-block;margin:0 12px;color:var(--ink);font-weight:600;font-size:0.85rem;text-decoration:none">📦 产品分析</a>
+  <a href="#sec5" style="display:inline-block;margin:0 12px;color:var(--ink);font-weight:600;font-size:0.85rem;text-decoration:none">📐 尺寸分析</a>
+  <a href="#sec6" style="display:inline-block;margin:0 12px;color:var(--ink);font-weight:600;font-size:0.85rem;text-decoration:none">🔍 分公司型号</a>
 </div>
 
 <!-- ====== SECTION 1: 年度总览 ====== -->
@@ -329,6 +335,82 @@ footer { padding: 20px; font-size: 0.76rem; color: var(--muted); text-align: cen
   <div class="insight-card" id="insight-product">
     <h4>💡 产品洞察</h4>
     <p id="insight-product-text">加载中...</p>
+  </div>
+</div>
+
+<!-- ====== SECTION 5: 尺寸分析 ====== -->
+<div class="section" id="sec5">
+  <div class="section-header">
+    <h2>五、尺寸段分析 · 年度累计</h2>
+    <span class="badge">26W01-26W27 累计</span>
+  </div>
+
+  <div class="two-col-6-4">
+    <figure class="chart-figure">
+      <figcaption>各尺寸段年度累计销额对比（创维 vs 海信 vs TCL）</figcaption>
+      <div id="chart-size-cumulative" style="width:100%;min-height:400px"></div>
+    </figure>
+    <figure class="chart-figure">
+      <figcaption>各尺寸段品牌份额分布</figcaption>
+      <div id="chart-size-share" style="width:100%;min-height:400px"></div>
+    </figure>
+  </div>
+
+  <h3 style="font-size:0.95rem;margin:24px 0 12px">各分公司关键尺寸段创维份额</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>分公司</th><th>80吋+份额</th><th>75-77吋份额</th><th>65吋份额</th><th>55吋及以下份额</th><th>最强尺寸段</th><th>最强份额</th></tr></thead>
+      <tbody id="table-branch-size-body"></tbody>
+    </table>
+  </div>
+
+  <div class="insight-card" id="insight-size">
+    <h4>💡 尺寸分析洞察</h4>
+    <p id="insight-size-text">加载中...</p>
+  </div>
+</div>
+
+<!-- ====== SECTION 6: 分公司型号分析 ====== -->
+<div class="section" id="sec6">
+  <div class="section-header">
+    <h2>六、分公司型号分析</h2>
+    <span class="badge" id="sec6-badge">26W01-26W27 累计</span>
+  </div>
+
+  <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px">选择分公司查看该分公司年度累计TOP10型号，以及南部全部&amp;该分公司型号对比。</p>
+
+  <div class="compare-row">
+    <div class="compare-card">
+      <h4>南部全部 · 创维年度TOP5</h4>
+      <div class="table-wrap" style="max-height:240px">
+        <table>
+          <thead><tr><th>排名</th><th>型号</th><th>累计销量</th><th>累计销额</th><th>均价</th></tr></thead>
+          <tbody id="table-all-cw-top5-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="compare-card">
+      <h4 id="branch-top5-title">选中分公司 · 创维年度TOP5</h4>
+      <div class="table-wrap" style="max-height:240px">
+        <table>
+          <thead><tr><th>排名</th><th>型号</th><th>累计销量</th><th>累计销额</th><th>均价</th></tr></thead>
+          <tbody id="table-br-cw-top5-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size:0.95rem;margin:20px 0 12px" id="branch-top10-title">选中分公司 · 全品牌年度TOP10</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>排名</th><th>品牌</th><th>型号</th><th>累计销量</th><th>累计销额</th><th>均价</th><th>出现周数</th></tr></thead>
+      <tbody id="table-branch-top10-body"></tbody>
+    </table>
+  </div>
+
+  <div class="insight-card" id="insight-branch-model">
+    <h4>💡 分公司型号洞察</h4>
+    <p id="insight-branch-model-text">加载中...</p>
   </div>
 </div>
 
