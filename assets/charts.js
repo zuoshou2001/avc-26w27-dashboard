@@ -148,11 +148,18 @@
   }
 
   function updateSectionVisibility(d) {
-    // All sections exist in both weekly and monthly now
-    // TOC grid is always 5 columns since we always show all sections
-    var tocGrid = document.querySelector('.toc-grid');
+    // Branch detail section visibility
+    var branchDetail = document.getElementById('branch-detail');
+    var tocBranchDetail = document.getElementById('toc-branch-detail');
+    var isBranch = currentBranch !== '南部全部';
+    
+    if (branchDetail) branchDetail.style.display = isBranch ? '' : 'none';
+    if (tocBranchDetail) tocBranchDetail.style.display = isBranch ? '' : 'none';
+
+    // TOC grid: 6 columns when branch, 5 when all
+    var tocGrid = document.getElementById('toc-grid');
     if (tocGrid) {
-      tocGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+      tocGrid.style.gridTemplateColumns = isBranch ? 'repeat(6, 1fr)' : 'repeat(5, 1fr)';
     }
 
     // Update badge text
@@ -161,6 +168,147 @@
     badges.forEach(function(b) {
       b.textContent = currentKey + ' ' + branchLabel;
     });
+  }
+
+  function renderBranchDetail(d) {
+    if (currentBranch === '南部全部') return;
+    if (!d.totals) return;
+
+    var allData = (currentMode === 'weekly' ? DASHBOARD_ALL.data : DASHBOARD_ALL.monthly)[currentKey];
+    if (!allData || !allData.msData) return;
+
+    // 1. Compute rankings
+    var rankAmount = 1, rankMs = 1, rankAchieve = 1;
+    var branchCw = d.totals.cw;
+    var branchMs = d.totals.ms;
+    var branchAchieve = d.totals.achieve;
+    allData.msData.forEach(function(r) {
+      if (r.branch !== currentBranch) {
+        if (r.cw > branchCw) rankAmount++;
+        if (r.cw_ms > branchMs) rankMs++;
+        if (r.achieve > branchAchieve) rankAchieve++;
+      }
+    });
+
+    // 2. Contribution
+    var totalCw = allData.totals ? allData.totals.cw : 0;
+    var contribution = totalCw > 0 ? (branchCw / totalCw * 100) : 0;
+    var leadHx = d.totals.cw - d.totals.hx;
+
+    // Update ranking cards
+    var rkAmt = document.getElementById('br-rank-amount');
+    if (rkAmt) rkAmt.textContent = '第' + rankAmount;
+    var rkMs = document.getElementById('br-rank-ms');
+    if (rkMs) rkMs.textContent = '第' + rankMs;
+    var rkAch = document.getElementById('br-rank-achieve');
+    if (rkAch) rkAch.textContent = '第' + rankAchieve;
+    var brCont = document.getElementById('br-contribution');
+    if (brCont) brCont.textContent = contribution.toFixed(1) + '%';
+    var brLead = document.getElementById('br-lead-hx');
+    if (brLead) {
+      brLead.textContent = (leadHx >= 0 ? '+' : '') + leadHx.toFixed(1) + '万';
+      brLead.style.color = leadHx >= 0 ? 'var(--green)' : 'var(--accent)';
+    }
+
+    // 3. Trend chart: last 5-6 weeks
+    var allWeeks = DASHBOARD_ALL.allWeeks;
+    var trendWeeks = [], trendAmounts = [], trendMS = [];
+    var lastWeeks = allWeeks.slice(-6);
+    lastWeeks.forEach(function(w) {
+      var bw = DASHBOARD_ALL.branchData[w];
+      if (bw && bw[currentBranch] && bw[currentBranch].totals) {
+        trendWeeks.push(w);
+        trendAmounts.push(bw[currentBranch].totals.cw.toFixed(1));
+        trendMS.push(+(bw[currentBranch].totals.ms * 100).toFixed(1));
+      }
+    });
+    // Update trend title
+    var trendTitle = document.getElementById('br-trend-title');
+    if (trendTitle) trendTitle.textContent = '近' + trendWeeks.length + '周创维销额 & 市占率趋势';
+
+    var trendEl = document.getElementById('chart-branch-trend');
+    if (trendEl && trendWeeks.length > 0) {
+      var tChart = echarts.init(trendEl, null, { renderer: 'svg' });
+      tChart.setOption({
+        animation: false, tooltip: { trigger: 'axis', appendToBody: true },
+        legend: { data: ['销额(万)', '市占率%'], bottom: 0, textStyle: { color: ink, fontSize: 10 } },
+        grid: { left: '3%', right: '4%', bottom: '12%', top: '10%', containLabel: true },
+        xAxis: { type: 'category', data: trendWeeks, axisLabel: { color: muted, fontSize: 10 } },
+        yAxis: [{ type: 'value', name: '万', axisLabel: { color: muted, fontSize: 10 }, splitLine: { lineStyle: { color: rule } } },
+          { type: 'value', name: '%', axisLabel: { color: muted, fontSize: 10 }, splitLine: { show: false } }],
+        color: [accent, blue],
+        series: [
+          { name: '销额(万)', type: 'bar', data: trendAmounts, barWidth: '50%', itemStyle: { borderRadius: [4,4,0,0] }, label: { show: true, position: 'top', color: ink, fontSize: 9 } },
+          { name: '市占率%', type: 'line', yAxisIndex: 1, data: trendMS, symbol: 'circle', symbolSize: 8, lineStyle: { width: 2.5, color: blue }, itemStyle: { color: blue, borderColor: '#fff', borderWidth: 2 }, label: { show: true, color: blue, fontSize: 9, formatter: '{c}%' } }
+        ]
+      });
+      allCharts.push(tChart);
+    }
+
+    // 4. Brand competition pie chart
+    var pieEl = document.getElementById('chart-branch-brand-pie');
+    if (pieEl && d.brandOverview) {
+      var pChart = echarts.init(pieEl, null, { renderer: 'svg' });
+      var pieData = d.brandOverview.map(function(r) {
+        return { name: r.brand, value: r.amount };
+      });
+      pChart.setOption({
+        animation: false, tooltip: { trigger: 'item', appendToBody: true, formatter: '{b}: {c}万 ({d}%)' },
+        legend: { orient: 'vertical', right: 5, top: 'center', textStyle: { color: ink, fontSize: 10 } },
+        series: [{
+          type: 'pie', radius: ['50%', '75%'], center: ['40%', '50%'], data: pieData,
+          label: { color: ink, fontSize: 10, formatter: '{b}\n{d}%' },
+          itemStyle: { borderColor: bg2, borderWidth: 2 },
+          emphasis: { label: { fontSize: 14, fontWeight: 'bold' } }
+        }]
+      });
+      allCharts.push(pChart);
+    }
+
+    // 5. Branch CW TOP10
+    var cwTop10El = document.getElementById('chart-branch-cw-top10');
+    if (cwTop10El && d.top20_cw) {
+      var cwChart = echarts.init(cwTop10El, null, { renderer: 'svg' });
+      var items = d.top20_cw.slice(0, 10);
+      var labels = items.map(function(r) { return r.model; }).reverse();
+      var vals = items.map(function(r) { return r.amount; }).reverse();
+      cwChart.setOption({
+        animation: false, tooltip: { trigger: 'axis', appendToBody: true },
+        grid: { left: '3%', right: '12%', bottom: '8%', top: '5%', containLabel: true },
+        xAxis: { type: 'value', name: '万', axisLabel: { color: muted, fontSize: 9 }, splitLine: { lineStyle: { color: rule } } },
+        yAxis: { type: 'category', data: labels, axisLabel: { color: ink, fontSize: 10 }, axisLine: { show: false }, axisTick: { show: false } },
+        series: [{ type: 'bar', data: vals, barWidth: '55%', itemStyle: { borderRadius: [0,4,4,0], color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:accent},{offset:1,color:accent+'66'}]) }, label: { show: true, position: 'right', color: accent, fontSize: 10, fontWeight: 'bold' } }]
+      });
+      allCharts.push(cwChart);
+    }
+
+    // 6. Branch competitor TOP10 (non-创维)
+    var compTop10El = document.getElementById('chart-branch-comp-top10');
+    if (compTop10El && d.top20) {
+      var compChart = echarts.init(compTop10El, null, { renderer: 'svg' });
+      var compItems = d.top20.filter(function(r) { return r.brand !== '创维'; }).slice(0, 10);
+      if (compItems.length > 0) {
+        var compLabels = compItems.map(function(r) { return r.brand + ' ' + r.model; }).reverse();
+        var compVals = compItems.map(function(r) { return r.amount; }).reverse();
+        compChart.setOption({
+          animation: false, tooltip: { trigger: 'axis', appendToBody: true },
+          grid: { left: '3%', right: '12%', bottom: '8%', top: '5%', containLabel: true },
+          xAxis: { type: 'value', name: '万', axisLabel: { color: muted, fontSize: 9 }, splitLine: { lineStyle: { color: rule } } },
+          yAxis: { type: 'category', data: compLabels, axisLabel: { color: ink, fontSize: 10 }, axisLine: { show: false }, axisTick: { show: false } },
+          series: [{ type: 'bar', data: compVals, barWidth: '55%', itemStyle: { borderRadius: [0,4,4,0], color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:blue},{offset:1,color:blue+'66'}]) }, label: { show: true, position: 'right', color: blue, fontSize: 10, fontWeight: 'bold' } }]
+        });
+      }
+      allCharts.push(compChart);
+    }
+
+    // 7. Insight text
+    var insightText = document.getElementById('branch-detail-insight-text');
+    if (insightText) {
+      var yoyStr = d.totals.yoy !== undefined ? ('同比' + (d.totals.yoy >= 0 ? '+' : '') + (d.totals.yoy*100).toFixed(1) + '%') : '';
+      insightText.textContent = currentBranch + '分公司在南部战区11个分公司中，销额排名第' + rankAmount + '，市占率排名第' + rankMs + '，达成率排名第' + rankAchieve + '。' +
+        '贡献南部战区创维销额' + contribution.toFixed(1) + '%。' + yoyStr + '。' +
+        '分公司内' + (leadHx >= 0 ? '领先' : '落后') + '海信' + Math.abs(leadHx).toFixed(1) + '万。';
+    }
   }
 
   function renderAll() {
@@ -184,6 +332,7 @@
     updateHeader();
     updateKPIs(d);
     updateSectionVisibility(d);
+    renderBranchDetail(d);
 
     // ========== TABLES ==========
     // Brand overview table

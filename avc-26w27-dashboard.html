@@ -218,7 +218,7 @@ footer {
   <a href="#size-top5">尺寸TOP</a>
   <span class="nav-sep">|</span>
   <a href="#q7h-compare">Q7H对比</a>
-  <a href="national.html" style="color:var(--accent);font-weight:700;background:#fef2f2;padding:4px 10px;border-radius:4px;margin-left:8px;font-size:0.72rem">全国趋势 →</a>
+  <a href="national.html" style="color:var(--accent);font-weight:700;background:#fef2f2;padding:4px 10px;border-radius:4px;margin-left:8px;font-size:0.72rem">南部趋势 →</a>
   <select id="branch-selector" style="margin-left:auto;margin-right:4px">
     <option value="南部全部" selected>南部全部</option>
     <option value="深圳">深圳</option>
@@ -319,9 +319,76 @@ footer {
   </div>
 </div>
 
+<!-- 分公司深度分析 (仅选分公司时可见) -->
+<div class="section" id="branch-detail" style="display:none">
+  <div class="section-header">
+    <h2>分公司深度分析</h2>
+    <span class="badge" id="branch-detail-badge">26W27</span>
+  </div>
+
+  <!-- 排名卡片 -->
+  <div class="kpi-grid" style="margin-bottom: 20px;">
+    <div class="kpi-card blue">
+      <div class="label">销额排名</div>
+      <div class="value" id="br-rank-amount" style="color:var(--blue)">第1</div>
+      <div class="sub">南部战区11个分公司中</div>
+    </div>
+    <div class="kpi-card accent">
+      <div class="label">市占率排名</div>
+      <div class="value" id="br-rank-ms" style="color:var(--accent)">第1</div>
+      <div class="sub">南部战区11个分公司中</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="label">达成率排名</div>
+      <div class="value" id="br-rank-achieve" style="color:var(--green)">第1</div>
+      <div class="sub">南部战区11个分公司中</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="label">贡献度</div>
+      <div class="value" id="br-contribution" style="color:var(--orange)">--</div>
+      <div class="sub">占南部战区创维销额比例</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="label">领先/落后海信</div>
+      <div class="value" id="br-lead-hx" style="color:var(--purple)">--</div>
+      <div class="sub">分公司内 vs 海信差距</div>
+    </div>
+  </div>
+
+  <!-- 近5周趋势 + 品牌竞争饼图 -->
+  <div class="two-col-6-4">
+    <figure class="chart-figure">
+      <figcaption id="br-trend-title">近5周创维销额 &amp; 市占率趋势</figcaption>
+      <div id="chart-branch-trend" style="width:100%;min-height:340px"></div>
+    </figure>
+    <figure class="chart-figure">
+      <figcaption>分公司品牌竞争格局</figcaption>
+      <div id="chart-branch-brand-pie" style="width:100%;min-height:340px"></div>
+    </figure>
+  </div>
+
+  <!-- 分公司型号TOP10 + 品牌对比 -->
+  <div class="chart-grid" style="margin-top:20px">
+    <figure class="chart-figure">
+      <figcaption>分公司创维型号TOP10</figcaption>
+      <div id="chart-branch-cw-top10" style="width:100%;min-height:340px"></div>
+    </figure>
+    <figure class="chart-figure">
+      <figcaption>分公司竞品型号TOP10</figcaption>
+      <div id="chart-branch-comp-top10" style="width:100%;min-height:340px"></div>
+    </figure>
+  </div>
+
+  <div class="insight-card" id="branch-detail-insight">
+    <h4>💡 分公司洞察</h4>
+    <p id="branch-detail-insight-text">加载中...</p>
+  </div>
+</div>
+
 <!-- 目录 -->
 <div class="container" style="margin-top:20px">
-  <div class="toc-grid">
+  <div class="toc-grid" id="toc-grid">
+    <a href="#branch-detail" class="toc-item" id="toc-branch-detail" style="display:none"><span class="toc-num">0</span>分公司概览</a>
     <a href="#brand-overview" class="toc-item"><span class="toc-num">1</span>品牌竞争格局</a>
     <a href="#ms-overview" class="toc-item"><span class="toc-num">2</span>市占率概览</a>
     <a href="#size-98" class="toc-item"><span class="toc-num">3</span>98吋+百吋分析</a>
