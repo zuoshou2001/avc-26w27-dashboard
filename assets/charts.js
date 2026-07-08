@@ -92,6 +92,12 @@
     var kpiAchieve = document.getElementById('kpi-achieve');
     if (kpiAchieve && t.achieve !== undefined) {
       kpiAchieve.textContent = (t.achieve*100).toFixed(1) + '%';
+      var kpiAchieveSub = document.getElementById('kpi-achieve-sub');
+      if (kpiAchieveSub) {
+        var targetPct = t.target !== undefined ? (t.target*100).toFixed(1) : '24.5';
+        var status = t.achieve >= 1.0 ? '超额完成' : t.achieve >= 0.9 ? '接近目标' : '未达标';
+        kpiAchieveSub.textContent = '目标 ' + targetPct + '% · ' + status;
+      }
     }
 
     // vs 海信差距
