@@ -126,38 +126,17 @@
   }
 
   function updateSectionVisibility(d) {
-    // Sections that only exist in weekly data
-    var weeklyOnlySections = ['size-98', 'top20', 'size-analysis', 'size-top5', 'q7h-compare'];
-    weeklyOnlySections.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) {
-        el.style.display = (currentMode === 'weekly') ? '' : 'none';
-      }
-    });
-
-    // TOC items for weekly-only sections
-    var tocItems = document.querySelectorAll('.toc-item');
-    tocItems.forEach(function(item) {
-      var href = item.getAttribute('href');
-      if (href === '#size-98' || href === '#top20' || href === '#size-analysis') {
-        item.style.display = (currentMode === 'weekly') ? '' : 'none';
-      }
-    });
-
-    // Update TOC grid columns
+    // All sections exist in both weekly and monthly now
+    // TOC grid is always 5 columns since we always show all sections
     var tocGrid = document.querySelector('.toc-grid');
     if (tocGrid) {
-      tocGrid.style.gridTemplateColumns = (currentMode === 'weekly') ? 'repeat(5, 1fr)' : 'repeat(2, 1fr)';
+      tocGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
     }
 
     // Update badge text
     var badges = document.querySelectorAll('.section-header .badge');
     badges.forEach(function(b) {
-      if (currentMode === 'weekly') {
-        b.textContent = currentKey + ' 南部战区';
-      } else {
-        b.textContent = currentKey + ' 南部战区';
-      }
+      b.textContent = currentKey + ' 南部战区';
     });
   }
 
@@ -289,8 +268,7 @@
       allCharts.push(c2);
     }
 
-    // ========== WEEKLY-ONLY SECTIONS ==========
-    if (currentMode === 'weekly') {
+    // ========== ALL SECTIONS (both weekly & monthly) ==========
 
       // CHART 3: 98+ horizontal bar
       var c3El = document.getElementById('chart-98-bar');
@@ -529,36 +507,21 @@
         document.getElementById('table-q7h-body').innerHTML = q7hHtml;
       }
 
-    } // end weekly-only
-
-    // ===== Monthly mode: show monthly overview =====
-    if (currentMode === 'monthly') {
-      // Monthly mode only has brand overview + MS overview, already rendered above
-      // Add a monthly summary insight card
-      var msSection = document.getElementById('ms-overview');
-      var existingInsight = msSection ? msSection.querySelector('.insight-card') : null;
-      if (existingInsight) {
-        var months = DASHBOARD_ALL.allMonths || [];
-        var insightHtml = '';
-        if (months.length > 1) {
-          var prevMonth = months[months.indexOf(currentKey) - 1];
-          if (prevMonth && DASHBOARD_ALL.monthly[prevMonth]) {
-            var prevData = DASHBOARD_ALL.monthly[prevMonth];
-            var msChange = d.totals ? ((d.totals.ms - prevData.totals.ms)*100).toFixed(1) : '0';
-            var cwChange = d.totals ? (d.totals.cw - prevData.totals.cw).toFixed(1) : '0';
-            insightHtml = '<h4>💡 月度关键洞察</h4><p>创维' + currentKey + '累计销额' + d.totals.cw.toFixed(1) + '万，市占率' + (d.totals.ms*100).toFixed(1) + '%。';
-            if (prevMonth) {
-              insightHtml += '相比' + prevMonth + '累计，市占率变化' + (msChange >= 0 ? '+' : '') + msChange + '%，销额变化' + (cwChange >= 0 ? '+' : '') + cwChange + '万。';
-            }
-            insightHtml += '</p>';
-          } else {
-            insightHtml = '<h4>💡 月度关键洞察</h4><p>创维' + currentKey + '累计销额' + d.totals.cw.toFixed(1) + '万，市占率' + (d.totals.ms*100).toFixed(1) + '%。海信以' + d.totals.hx.toFixed(1) + '万领先，差距' + (d.totals.cw - d.totals.hx).toFixed(1) + '万。</p>';
-          }
-        } else {
-          insightHtml = '<h4>💡 月度关键洞察</h4><p>创维' + currentKey + '累计销额' + d.totals.cw.toFixed(1) + '万，市占率' + (d.totals.ms*100).toFixed(1) + '%。海信以' + d.totals.hx.toFixed(1) + '万领先，差距' + (d.totals.cw - d.totals.hx).toFixed(1) + '万。</p>';
-        }
-        existingInsight.innerHTML = insightHtml;
+    // ===== General insight card =====
+    var msSection = document.getElementById('ms-overview');
+    var existingInsight = msSection ? msSection.querySelector('.insight-card') : null;
+    if (existingInsight && d.totals) {
+      var yoyStr = '';
+      if (d.totals.yoy !== undefined) {
+        yoyStr = '，同比' + (d.totals.yoy >= 0 ? '+' : '') + (d.totals.yoy*100).toFixed(1) + '%';
       }
+      var insightHtml = '<h4>💡 关键洞察</h4><p>创维' + currentKey + '销额' + d.totals.cw.toFixed(1) + '万，市占率' + (d.totals.ms*100).toFixed(1) + '%' + yoyStr + '。';
+      insightHtml += '海信以' + d.totals.hx.toFixed(1) + '万领先，差距' + (d.totals.cw - d.totals.hx).toFixed(1) + '万。';
+      if (d.totals.ms_25 !== undefined) {
+        insightHtml += '同期' + (d.totals.ms_25*100).toFixed(1) + '%。';
+      }
+      insightHtml += '</p>';
+      existingInsight.innerHTML = insightHtml;
     }
   }
 
