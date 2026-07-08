@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>创维电视 · 2026年国内市场周度趋势看板 | 26W27</title>
+<meta name="description" content="创维电视2026年国内市场AVC零售监测周度趋势看板。分公司为单位，涵盖全国周度趋势、品牌竞争格局、市场趋势分析、产品分析。">
+<meta name="keywords" content="创维电视,AVC,奥维云网,国内市场,周度趋势,市占率,品牌竞争,分公司">
+<meta property="og:title" content="创维电视 · 2026年国内市场周度趋势看板 | 26W27">
+<meta property="og:description" content="分公司为单位 · 全国周度趋势 · 品牌竞争格局 · 市场趋势 · 产品分析">
+<meta property="og:image" content="https://zuoshou2001.github.io/avc-26w27-dashboard/assets/og-image.jpg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://zuoshou2001.github.io/avc-26w27-dashboard/national.html">
+<meta property="og:site_name" content="创维电视数据看板">
+<meta property="og:locale" content="zh_CN">
+<meta itemprop="name" content="创维电视 · 2026年国内市场周度趋势看板 | 26W27">
+<meta itemprop="description" content="分公司为单位 · 全国周度趋势 · 品牌竞争格局 · 市场趋势 · 产品分析">
+<meta itemprop="image" content="https://zuoshou2001.github.io/avc-26w27-dashboard/assets/og-image.jpg">
+<meta property="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a1a2e'/><text x='50' y='68' text-anchor='middle' font-size='55' font-weight='bold' fill='%23e63946'>26</text></svg>">
+<style>
+:root {
+  --bg: #ffffff; --bg2: #f5f7fa; --ink: #1a1a2e; --muted: #6b7280; --rule: #e2e8f0;
+  --accent: #e63946; --accent2: #457b9d; --green: #16a34a; --orange: #ea580c;
+  --blue: #2563eb; --purple: #7c3aed; --teal: #0d9488;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; font-size: 15px; line-height: 1.6; color: var(--ink); background: var(--bg2); }
+.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+/* Header */
+.header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 28px 0 24px; margin-bottom: 20px; color: #fff; }
+.header .container { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px; }
+.header h1 { font-size: 1.3rem; font-weight: 700; }
+.header .sub { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 4px; }
+.header .meta { font-size: 0.8rem; color: rgba(255,255,255,0.5); text-align: right; }
+.header .meta .week { font-size: 1.1rem; font-weight: 700; color: #e63946; display: block; }
+
+/* Nav */
+.nav-bar { position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 1px solid var(--rule); padding: 0 18px; display: flex; align-items: center; gap: 2px; overflow-x: auto; height: 42px; white-space: nowrap; }
+.nav-bar a { display: inline-block; padding: 5px 12px; font-size: 0.76rem; font-weight: 600; color: var(--muted); text-decoration: none; border-radius: 5px; transition: all 0.15s; }
+.nav-bar a:hover, .nav-bar a.active { color: var(--accent); background: #fef2f2; }
+.nav-bar select { margin-left: auto; padding: 3px 8px; font-size: 0.76rem; font-weight: 600; border: 1px solid var(--rule); border-radius: 5px; background: var(--bg); color: var(--ink); cursor: pointer; outline: none; }
+.nav-bar select:focus { border-color: var(--accent); }
+.nav-bar .nav-label { font-size: 0.7rem; color: var(--muted); margin-right: 6px; font-weight: 500; }
+.nav-bar .nav-sep { color: var(--rule); margin: 0 1px; }
+
+/* KPI Grid */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.kpi-card { background: var(--bg); border-radius: 8px; padding: 16px 20px; border: 1px solid var(--rule); position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; border-radius: 3px 0 0 3px; }
+.kpi-card.accent::before { background: var(--accent); }
+.kpi-card.blue::before { background: var(--blue); }
+.kpi-card.green::before { background: var(--green); }
+.kpi-card.orange::before { background: var(--orange); }
+.kpi-card .label { font-size: 0.72rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+.kpi-card .value { font-size: 1.8rem; font-weight: 800; line-height: 1.1; }
+.kpi-card .sub { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+.kpi-card.accent .value { color: var(--accent); }
+.kpi-card.blue .value { color: var(--blue); }
+.kpi-card.green .value { color: var(--green); }
+.kpi-card.orange .value { color: var(--orange); }
+
+/* Section */
+.section { background: var(--bg); border-radius: 8px; border: 1px solid var(--rule); padding: 24px; margin-bottom: 20px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--accent); }
+.section-header h2 { font-size: 1.05rem; font-weight: 700; }
+.section-header .badge { font-size: 0.7rem; background: var(--accent); color: #fff; padding: 3px 10px; border-radius: 10px; font-weight: 600; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; max-height: 500px; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+thead th { background: var(--bg2); padding: 8px 10px; text-align: left; font-weight: 600; color: var(--muted); font-size: 0.7rem; text-transform: uppercase; border-bottom: 2px solid var(--rule); white-space: nowrap; }
+tbody td { padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+tbody tr:hover { background: var(--bg2); }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.rank { text-align: center; font-weight: 700; width: 36px; }
+.rank-dot { display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; border-radius: 50%; font-size: 0.7rem; font-weight: 700; color: #fff; }
+.rd-1 { background: var(--accent); }
+.rd-2 { background: var(--orange); }
+.rd-3 { background: var(--blue); }
+.rd-o { background: #94a3b8; }
+
+.tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.7rem; font-weight: 600; }
+.tag-red { background: #fef2f2; color: var(--accent); }
+.tag-green { background: #f0fdf4; color: var(--green); }
+.tag-yellow { background: #fffbeb; color: var(--orange); }
+.tag-blue { background: #eff6ff; color: var(--blue); }
+
+/* Charts */
+.chart-figure { margin: 0; }
+.chart-figure figcaption { font-size: 0.84rem; font-weight: 600; color: var(--ink); margin-bottom: 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.chart-grid.full { grid-template-columns: 1fr; }
+
+/* Layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.two-col-6-4 { display: grid; grid-template-columns: 6fr 4fr; gap: 20px; }
+.two-col-4-6 { display: grid; grid-template-columns: 4fr 6fr; gap: 20px; }
+
+/* Size tabs */
+.size-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+.size-tab { padding: 5px 14px; font-size: 0.74rem; font-weight: 600; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.size-tab:hover { border-color: var(--accent); color: var(--accent); }
+.size-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.size-tab-content { display: none; }
+.size-tab-content.active { display: block; }
+
+/* Insight */
+.insight-card { background: var(--bg2); border-radius: 8px; padding: 14px; margin-top: 14px; border-left: 3px solid var(--accent); }
+.insight-card h4 { font-size: 0.78rem; color: var(--accent); margin-bottom: 5px; }
+.insight-card p { font-size: 0.8rem; color: var(--ink); line-height: 1.5; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .chart-grid, .two-col, .two-col-6-4, .two-col-4-6 { grid-template-columns: 1fr; }
+  .header .container { flex-direction: column; align-items: flex-start; }
+}
+
+footer { padding: 20px; font-size: 0.76rem; color: var(--muted); text-align: center; border-top: 1px solid var(--rule); margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<!-- 导航 -->
+<nav class="nav-bar">
+  <span class="nav-label">导航</span>
+  <a href="#sec1" class="active">核心指标</a>
+  <span class="nav-sep">|</span>
+  <a href="#sec2">品牌竞争</a>
+  <span class="nav-sep">|</span>
+  <a href="#sec3">市场趋势</a>
+  <span class="nav-sep">|</span>
+  <a href="#sec4">产品分析</a>
+  <select id="week-selector" style="margin-left:auto"></select>
+</nav>
+
+<!-- Header -->
+<div class="header">
+  <div class="container">
+    <div>
+      <h1>创维电视 · 2026年国内市场周度趋势看板</h1>
+      <p class="sub">数据来源：AVC零售监测 · 全国线上市场</p>
+    </div>
+    <div class="meta">
+      <span class="week" id="header-week">26W27</span>
+      06.29 - 07.05
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- KPI Cards -->
+<div class="kpi-grid">
+  <div class="kpi-card accent">
+    <div class="label">创维本周销量</div>
+    <div class="value" id="kpi-cw-sales">1,173</div>
+    <div class="sub">销额 <span id="kpi-cw-amount">541.3万</span> · 同比 <span id="kpi-yoy-sales" style="color:var(--green)">▲2.5%</span></div>
+  </div>
+  <div class="kpi-card blue">
+    <div class="label">创维市占率</div>
+    <div class="value" id="kpi-cw-ms-amt">24.6%</div>
+    <div class="sub">量<span id="kpi-cw-ms-qty">30.0%</span> · 同比 <span id="kpi-yoy-amount" style="color:var(--green)">▲1.8%</span></div>
+  </div>
+  <div class="kpi-card green">
+    <div class="label">大盘本周销量</div>
+    <div class="value" id="kpi-total-sales">3,914</div>
+    <div class="sub">销额 <span id="kpi-total-amount">2200.6万</span> · 均价 <span id="kpi-avg-price">¥5,623</span></div>
+  </div>
+  <div class="kpi-card orange">
+    <div class="label">分公司排名</div>
+    <div class="value" style="font-size:1.4rem">深圳 · 销额领先</div>
+    <div class="sub">11个分公司 · 数据看板</div>
+  </div>
+</div>
+
+<!-- 目录 -->
+<div class="section" style="text-align:center;padding:16px">
+  <a href="#sec1" style="display:inline-block;margin:0 12px;color:var(--accent);font-weight:600;font-size:0.85rem;text-decoration:none">📊 核心指标</a>
+  <a href="#sec2" style="display:inline-block;margin:0 12px;color:var(--ink);font-weight:600;font-size:0.85rem;text-decoration:none">🏆 品牌竞争</a>
+  <a href="#sec3" style="display:inline-block;margin:0 12px;color:var(--ink);font-weight:600;font-size:0.85rem;text-decoration:none">📈 市场趋势</a>
+  <a href="#sec4" style="display:inline-block;margin:0 12px;color:var(--ink);font-weight:600;font-size:0.85rem;text-decoration:none">📦 产品分析</a>
+</div>
+
+<!-- ====== SECTION 1: 核心指标 ====== -->
+<div class="section" id="sec1">
+  <div class="section-header">
+    <h2>一、数据看板 · 创维核心指标</h2>
+    <span class="badge" id="badge-sec1">26W27 全国</span>
+  </div>
+
+  <div class="two-col-6-4">
+    <div>
+      <figure class="chart-figure">
+        <figcaption>创维周度销量 &amp; 销额趋势</figcaption>
+        <div id="chart-cw-trend" style="width:100%;min-height:360px"></div>
+      </figure>
+    </div>
+    <div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>排名</th><th>分公司</th><th>创维销量</th><th>创维销额</th><th>市占率</th><th>大盘销量</th><th>大盘销额</th></tr></thead>
+          <tbody id="table-branch-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-card">
+    <h4>💡 分公司概览</h4>
+    <p>11个分公司中，深圳、闽北、海南销额领先。各分公司详细数据见上方排名表，点击导航栏「品牌竞争」查看全国品牌格局。</p>
+  </div>
+</div>
+
+<!-- ====== SECTION 2: 品牌竞争 ====== -->
+<div class="section" id="sec2">
+  <div class="section-header">
+    <h2>二、TOP10品牌竞争格局</h2>
+    <span class="badge" id="badge-sec2">26W27 全国</span>
+  </div>
+
+  <div class="two-col-6-4">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>排名</th><th>品牌</th><th>销额</th><th>销量</th><th>额市占率</th><th>量市占率</th><th>均价</th></tr></thead>
+        <tbody id="table-brand-body"></tbody>
+      </table>
+    </div>
+    <figure class="chart-figure">
+      <figcaption>品牌累计销额趋势（W01-27）</figcaption>
+      <div id="chart-brand-cumulative" style="width:100%;min-height:380px"></div>
+    </figure>
+  </div>
+
+  <div class="insight-card">
+    <h4>💡 品牌竞争洞察</h4>
+    <p id="insight-brand">26W27全国线上市场，创维销额排名第X，市占率X%。海信、TCL为最主要竞争对手。</p>
+  </div>
+</div>
+
+<!-- ====== SECTION 3: 市场趋势 ====== -->
+<div class="section" id="sec3">
+  <div class="section-header">
+    <h2>三、2026年国内市场整体周度趋势</h2>
+    <span class="badge">W01-W27</span>
+  </div>
+
+  <figure class="chart-figure">
+    <figcaption>全国市场周度销量 · 销额 · 均价趋势</figcaption>
+    <div id="chart-national-trend" style="width:100%;min-height:380px"></div>
+  </figure>
+
+  <div class="chart-grid" style="margin-top:20px">
+    <figure class="chart-figure">
+      <figcaption>各尺寸段周度销量趋势</figcaption>
+      <div id="chart-size-trend" style="width:100%;min-height:360px"></div>
+    </figure>
+    <figure class="chart-figure">
+      <figcaption>各尺寸段品牌销额份额（26W27）</figcaption>
+      <div id="chart-brand-size-ms" style="width:100%;min-height:360px"></div>
+    </figure>
+  </div>
+
+  <div class="chart-grid full" style="margin-top:20px">
+    <figure class="chart-figure">
+      <figcaption>创维各尺寸段销额分布（26W27）</figcaption>
+      <div id="chart-cw-size-dist" style="width:100%;min-height:300px"></div>
+    </figure>
+  </div>
+
+  <div class="insight-card">
+    <h4>💡 市场趋势洞察</h4>
+    <p>2026年W01-W27全国线上市场周度趋势显示，销量和销额在W27呈现XX台/XX万的规模。创维在75吋/85吋大尺寸段持续发力。</p>
+  </div>
+</div>
+
+<!-- ====== SECTION 4: 产品分析 ====== -->
+<div class="section" id="sec4">
+  <div class="section-header">
+    <h2>四、产品分析</h2>
+    <span class="badge">26W27 全国</span>
+  </div>
+
+  <h3 style="font-size:0.95rem;margin-bottom:12px">全行业销售TOP30型号</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>排名</th><th>品牌</th><th>型号</th><th>尺寸</th><th>销量</th><th>销额</th><th>均价</th></tr></thead>
+      <tbody id="table-top30-body"></tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:0.95rem;margin:24px 0 12px">创维销售TOP20型号</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>排名</th><th>型号</th><th>尺寸</th><th>销量</th><th>销额</th><th>均价</th></tr></thead>
+      <tbody id="table-cw-top20-body"></tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:0.95rem;margin:24px 0 12px">各尺寸段销售TOP20</h3>
+  <div class="size-tabs">
+    <span class="size-tab active" data-seg="50">50吋及以下</span>
+    <span class="size-tab" data-seg="55">55-60吋</span>
+    <span class="size-tab" data-seg="65">65-70吋</span>
+    <span class="size-tab" data-seg="75">75吋</span>
+    <span class="size-tab" data-seg="85">85吋</span>
+    <span class="size-tab" data-seg="86">86-90吋</span>
+    <span class="size-tab" data-seg="98">98-100吋</span>
+  </div>
+  <div id="size-tab-50" class="size-tab-content active"><div class="table-wrap"><table><thead><tr><th>排名</th><th>品牌</th><th>型号</th><th>销量</th><th>销额</th><th>均价</th></tr></thead><tbody id="table-size-50"></tbody></table></div></div>
+  <div id="size-tab-55" class="size-tab-content"><div class="table-wrap"><table><thead><tr><th>排名</th><th>品牌</th><th>型号</th><th>销量</th><th>销额</th><th>均价</th></tr></thead><tbody id="table-size-55"></tbody></table></div></div>
+  <div id="size-tab-65" class="size-tab-content"><div class="table-wrap"><table><thead><tr><th>排名</th><th>品牌</th><th>型号</th><th>销量</th><th>销额</th><th>均价</th></tr></thead><tbody id="table-size-65"></tbody></table></div></div>
+  <div id="size-tab-75" class="size-tab-content"><div class="table-wrap"><table><thead><tr><th>排名</th><th>品牌</th><th>型号</th><th>销量</th><th>销额</th><th>均价</th></tr></thead><tbody id="table-size-75"></tbody></table></div></div>
+  <div id="size-tab-85" class="size-tab-content"><div class="table-wrap"><table><thead><tr><th>排名</th><th>品牌</th><th>型号</th><th>销量</th><th>销额</th><th>均价</th></tr></thead><tbody id="table-size-85"></tbody></table></div></div>
+  <div id="size-tab-86" class="size-tab-content"><div class="table-wrap"><table><thead><tr><th>排名</th><th>品牌</th><th>型号</th><th>销量</th><th>销额</th><th>均价</th></tr></thead><tbody id="table-size-86"></tbody></table></div></div>
+  <div id="size-tab-98" class="size-tab-content"><div class="table-wrap"><table><thead><tr><th>排名</th><th>品牌</th><th>型号</th><th>销量</th><th>销额</th><th>均价</th></tr></thead><tbody id="table-size-98"></tbody></table></div></div>
+
+  <div class="insight-card">
+    <h4>💡 产品洞察</h4>
+    <p>创维主力型号集中在75A3F、43A4FD等，大尺寸Mini LED产品（75A5F MINI、65A5F MINI）贡献显著销额。各尺寸段详细TOP20见上方标签切换。</p>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  数据来源：AVC零售监测 · 全国线上市场 &nbsp;|&nbsp; 创维电视 · 2026年国内市场周度趋势看板 &nbsp;|&nbsp; 26W27
+</footer>
+
+<script src="assets/echarts.min.js"></script>
+<script src="assets/national_data.js"></script>
+<script>
+// Populate week selector
+(function() {
+  var sel = document.getElementById('week-selector');
+  var weeks = DASHBOARD_NATIONAL.allWeeks;
+  for (var i = weeks.length - 1; i >= 0; i--) {
+    var opt = document.createElement('option');
+    opt.value = weeks[i];
+    opt.textContent = weeks[i];
+    if (weeks[i] === '26W27') opt.selected = true;
+    sel.appendChild(opt);
+  }
+})();
+</script>
+<script src="assets/national_charts.js"></script>
+
+</body>
+</html>
