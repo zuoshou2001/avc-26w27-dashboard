@@ -133,6 +133,47 @@ td.rank { text-align: center; font-weight: 700; width: 40px; }
   .header .container { flex-direction: column; align-items: flex-start; }
 }
 
+/* Nav Bar */
+.nav-bar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg); border-bottom: 1px solid var(--rule);
+  padding: 0 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex; align-items: center; gap: 4px; overflow-x: auto;
+  height: 44px; white-space: nowrap;
+}
+.nav-bar a {
+  display: inline-block; padding: 6px 14px; font-size: 0.78rem; font-weight: 600;
+  color: var(--muted); text-decoration: none; border-radius: 6px;
+  transition: all 0.15s;
+}
+.nav-bar a:hover, .nav-bar a.active { color: var(--accent); background: #fef2f2; }
+.nav-bar .nav-label { font-size: 0.7rem; color: var(--muted); margin-right: 8px; font-weight: 500; }
+.nav-bar .nav-sep { color: var(--rule); margin: 0 2px; }
+
+/* Week Selector */
+.nav-bar select {
+  margin-left: auto; padding: 4px 10px; font-size: 0.78rem; font-weight: 600;
+  border: 1px solid var(--rule); border-radius: 6px; background: var(--bg);
+  color: var(--ink); cursor: pointer; outline: none;
+}
+.nav-bar select:focus { border-color: var(--accent); }
+
+/* TOC Section */
+.toc-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+}
+.toc-item {
+  display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+  background: var(--bg2); border-radius: 8px; text-decoration: none;
+  color: var(--ink); font-size: 0.82rem; font-weight: 600; border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.toc-item:hover { border-color: var(--accent); background: #fef2f2; }
+.toc-item .toc-num {
+  width: 28px; height: 28px; line-height: 28px; text-align: center;
+  border-radius: 50%; background: var(--accent); color: #fff; font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
+}
+
 /* Footer */
 footer {
   padding: 24px; font-size: 0.78rem; color: var(--muted); text-align: center;
@@ -141,6 +182,53 @@ footer {
 </style>
 </head>
 <body>
+
+<!-- 顶部导航 -->
+<nav class="nav-bar">
+  <span class="nav-label">导航</span>
+  <a href="#brand-overview" class="active">品牌格局</a>
+  <span class="nav-sep">|</span>
+  <a href="#ms-overview">市占率</a>
+  <span class="nav-sep">|</span>
+  <a href="#size-98">98吋+</a>
+  <span class="nav-sep">|</span>
+  <a href="#top20">TOP20</a>
+  <span class="nav-sep">|</span>
+  <a href="#size-analysis">尺寸分析</a>
+  <span class="nav-sep">|</span>
+  <a href="#size-top5">尺寸TOP</a>
+  <span class="nav-sep">|</span>
+  <a href="#q7h-compare">Q7H对比</a>
+  <select id="week-selector" style="margin-left:auto">
+    <option value="26W27" selected>26W27</option>
+    <option value="26W26">26W26</option>
+    <option value="26W25">26W25</option>
+    <option value="26W24">26W24</option>
+    <option value="26W23">26W23</option>
+    <option value="26W22">26W22</option>
+    <option value="26W21">26W21</option>
+    <option value="26W20">26W20</option>
+    <option value="26W19">26W19</option>
+    <option value="26W18">26W18</option>
+    <option value="26W17">26W17</option>
+    <option value="26W16">26W16</option>
+    <option value="26W15">26W15</option>
+    <option value="26W14">26W14</option>
+    <option value="26W13">26W13</option>
+    <option value="26W12">26W12</option>
+    <option value="26W11">26W11</option>
+    <option value="26W10">26W10</option>
+    <option value="26W09">26W09</option>
+    <option value="26W08">26W08</option>
+    <option value="26W07">26W07</option>
+    <option value="26W06">26W06</option>
+    <option value="26W05">26W05</option>
+    <option value="26W04">26W04</option>
+    <option value="26W03">26W03</option>
+    <option value="26W02">26W02</option>
+    <option value="26W01">26W01</option>
+  </select>
+</nav>
 
 <div class="header">
   <div class="container">
@@ -187,8 +275,19 @@ footer {
   </div>
 </div>
 
+<!-- 目录 -->
+<div class="container" style="margin-top:20px">
+  <div class="toc-grid">
+    <a href="#brand-overview" class="toc-item"><span class="toc-num">1</span>品牌竞争格局</a>
+    <a href="#ms-overview" class="toc-item"><span class="toc-num">2</span>市占率概览</a>
+    <a href="#size-98" class="toc-item"><span class="toc-num">3</span>98吋+百吋分析</a>
+    <a href="#top20" class="toc-item"><span class="toc-num">4</span>TOP20型号</a>
+    <a href="#size-analysis" class="toc-item"><span class="toc-num">5</span>尺寸段分析</a>
+  </div>
+</div>
+
 <!-- Section 0: 品牌竞争格局总览 -->
-<div class="section">
+<div class="section" id="brand-overview">
   <div class="section-header">
     <h2>品牌竞争格局总览</h2>
     <span class="badge">26W27 南部战区</span>
@@ -211,7 +310,7 @@ footer {
 </div>
 
 <!-- Section 1: 市占率概览 -->
-<div class="section">
+<div class="section" id="ms-overview">
   <div class="section-header">
     <h2>各分公司市占率 &amp; 达成率概览</h2>
     <span class="badge">按创维销额排序</span>
@@ -243,8 +342,8 @@ footer {
   </div>
 </div>
 
-<!-- Section 2: 98吋+百吋分析 -->
-<div class="section">
+<!-- Section 2: 98+ -->
+<div class="section" id="size-98">
   <div class="section-header">
     <h2>98吋+ 百吋市场分析</h2>
     <span class="badge">26W27</span>
@@ -276,7 +375,7 @@ footer {
 </div>
 
 <!-- Section 3: TOP20型号分析 -->
-<div class="section">
+<div class="section" id="top20">
   <div class="section-header">
     <h2>TOP20 型号 &amp; 品牌分析</h2>
     <span class="badge">全品牌销额排名</span>
@@ -312,7 +411,7 @@ footer {
 </div>
 
 <!-- Section 4: 尺寸段分析 -->
-<div class="section">
+<div class="section" id="size-analysis">
   <div class="section-header">
     <h2>尺寸段结构 &amp; 品牌份额</h2>
     <span class="badge">26W27</span>
@@ -345,7 +444,7 @@ footer {
 </div>
 
 <!-- Section 5: 各尺寸段TOP5型号 -->
-<div class="section">
+<div class="section" id="size-top5">
   <div class="section-header">
     <h2>各尺寸段 TOP5 型号</h2>
     <span class="badge">26W27</span>
@@ -380,7 +479,7 @@ footer {
 </div>
 
 <!-- Section 6: Q7H vs U7S-PRO -->
-<div class="section">
+<div class="section" id="q7h-compare">
   <div class="section-header">
     <h2>Q7H vs HX U7S-PRO 专项对比</h2>
     <span class="badge">26W27</span>
@@ -411,8 +510,31 @@ footer {
   南部战区 AVC 周度市场分析看板 · 26W27 (06.29-07.05) · 数据来源：AVC零售监测 · 创维电视 &copy; 2026
 </footer>
 
-<script src="assets/dashboard_data.js"></script>
 <script src="assets/echarts.min.js"></script>
+<script src="assets/dashboard_data.js"></script>
+<script>
+// Scroll spy for nav
+(function() {
+  var navLinks = document.querySelectorAll('.nav-bar a');
+  var sections = [];
+  navLinks.forEach(function(a) {
+    var id = a.getAttribute('href');
+    if (id && id.startsWith('#')) {
+      var el = document.querySelector(id);
+      if (el) sections.push({ el: el, a: a, id: id });
+    }
+  });
+  window.addEventListener('scroll', function() {
+    var scrollY = window.scrollY + 80;
+    var active = null;
+    sections.forEach(function(s) {
+      if (s.el.offsetTop <= scrollY) active = s;
+    });
+    navLinks.forEach(function(a) { a.classList.remove('active'); });
+    if (active) active.a.classList.add('active');
+  });
+})();
+</script>
 <script src="assets/charts.js"></script>
 </body>
 </html>
