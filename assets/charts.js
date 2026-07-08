@@ -689,23 +689,99 @@
         document.getElementById('table-q7h-body').innerHTML = q7hHtml;
       }
 
-    // ===== General insight card =====
-    var msSection = document.getElementById('ms-overview');
-    var existingInsight = msSection ? msSection.querySelector('.insight-card') : null;
-    if (existingInsight && d.totals) {
-      var yoyStr = '';
-      if (d.totals.yoy !== undefined) {
-        yoyStr = '，同比' + (d.totals.yoy >= 0 ? '+' : '') + (d.totals.yoy*100).toFixed(1) + '%';
-      }
-      var branchLabel = currentBranch === '南部全部' ? '南部战区' : currentBranch;
-      var insightHtml = '<h4>💡 关键洞察</h4><p>创维' + branchLabel + ' ' + currentKey + '销额' + d.totals.cw.toFixed(1) + '万，市占率' + (d.totals.ms*100).toFixed(1) + '%' + yoyStr + '。';
-      insightHtml += '海信以' + d.totals.hx.toFixed(1) + '万领先，差距' + (d.totals.cw - d.totals.hx).toFixed(1) + '万。';
-      if (d.totals.ms_25 !== undefined) {
-        insightHtml += '同期' + (d.totals.ms_25*100).toFixed(1) + '%。';
-      }
-      insightHtml += '</p>';
-      existingInsight.innerHTML = insightHtml;
+    // ===== Dynamic insight cards =====
+    renderInsightMS(d);
+    renderInsight98(d);
+    renderInsightSize(d);
+    renderInsightQ7H(d);
+  }
+
+  function renderInsightMS(d) {
+    var el = document.getElementById('insight-ms-overview-text');
+    if (!el || !d.totals || !d.msData) return;
+    var branchLabel = currentBranch === '南部全部' ? '南部战区' : currentBranch;
+    var yoyStr = '';
+    if (d.totals.yoy !== undefined) {
+      yoyStr = '，同比' + (d.totals.yoy >= 0 ? '+' : '') + (d.totals.yoy*100).toFixed(1) + '%';
     }
+    var text = '创维' + branchLabel + ' ' + currentKey + '销额' + d.totals.cw.toFixed(1) + '万，市占率' + (d.totals.ms*100).toFixed(1) + '%' + yoyStr + '。';
+    text += '海信以' + d.totals.hx.toFixed(1) + '万领先，差距' + (d.totals.cw - d.totals.hx).toFixed(1) + '万。';
+    if (d.totals.ms_25 !== undefined) {
+      text += '同期25年市占率' + (d.totals.ms_25*100).toFixed(1) + '%。';
+    }
+    if (d.msData.length > 1) {
+      var above = d.msData.filter(function(r) { return r.achieve >= 1; }).length;
+      var below = d.msData.length - above;
+      var best = d.msData[0];
+      var worst = d.msData[d.msData.length - 1];
+      text += ' ' + above + '个分公司达成率超100%，' + best.branch + '（' + (best.cw_ms*100).toFixed(1) + '%）表现最佳，' + worst.branch + '（' + (worst.cw_ms*100).toFixed(1) + '%）需重点关注。';
+    }
+    el.textContent = text;
+  }
+
+  function renderInsight98(d) {
+    var el = document.getElementById('insight-98-text');
+    if (!el || !d.data98) return;
+    var totalCw = 0, totalHx = 0, totalTcl = 0;
+    d.data98.forEach(function(r) {
+      totalCw += r.cw_s; totalHx += r.hx_s; totalTcl += r.tcl_s;
+    });
+    var total = totalCw + totalHx + totalTcl;
+    var cwBest = d.data98.slice().sort(function(a, b) { return b.cw_s - a.cw_s; })[0];
+    var hxBest = d.data98.slice().sort(function(a, b) { return b.hx_s - a.hx_s; })[0];
+    var text = '98吋+市场创维' + totalCw + '台，海信' + totalHx + '台，TCL' + totalTcl + '台。';
+    text += '创维核心阵地在' + (cwBest ? cwBest.branch + '（' + cwBest.cw_s + '台）' : '--') + '；';
+    text += '海信主力在' + (hxBest ? hxBest.branch + '（' + hxBest.hx_s + '台）' : '--') + '。';
+    if (d.heat98 && d.heat98.length > 0) {
+      var highEnd = d.heat98.filter(function(h) { return h.price_band === '>3万'; });
+      var highTotal = highEnd.reduce(function(s, h) { return s + h.sales; }, 0);
+      if (highTotal > 0) {
+        text += ' >3万高端段共' + highTotal + '台，属于高价竞争区。';
+      }
+    }
+    el.textContent = text;
+  }
+
+  function renderInsightSize(d) {
+    var el = document.getElementById('insight-size-text');
+    if (!el || !d.sizeList || !d.cwShares) return;
+    var topSize = d.sizeList[0];
+    var text = topSize.size + '是行业第一大尺寸段（销额' + topSize.amount + '万），创维份额' + d.cwShares[0] + '%。';
+    var cwBestSeg = '', cwBestShare = 0;
+    for (var i = 0; i < d.sizeSegs.length; i++) {
+      if (d.cwShares[i] > cwBestShare) { cwBestShare = d.cwShares[i]; cwBestSeg = d.sizeSegs[i]; }
+    }
+    if (cwBestSeg) {
+      text += ' 创维在' + cwBestSeg + '份额' + cwBestShare + '%表现最佳。';
+    }
+    if (d.sizeTop5 && d.tclShares) {
+      var tclBestSeg = '', tclBestShare = 0;
+      for (var i = 0; i < d.sizeSegs.length; i++) {
+        if (d.tclShares[i] > tclBestShare) { tclBestShare = d.tclShares[i]; tclBestSeg = d.sizeSegs[i]; }
+      }
+      if (tclBestSeg) {
+        text += ' TCL在' + tclBestSeg + '份额' + tclBestShare + '%占主导。';
+      }
+    }
+    el.textContent = text;
+  }
+
+  function renderInsightQ7H(d) {
+    var el = document.getElementById('insight-q7h-text');
+    if (!el || !d.q7hData) return;
+    var totalQ7H = d.q7hData.reduce(function(s, r) { return s + r.q7h_s; }, 0);
+    var totalU7S = d.q7hData.reduce(function(s, r) { return s + r.u7s_s; }, 0);
+    var ratio = totalU7S > 0 ? (totalQ7H / totalU7S).toFixed(1) : '∞';
+    var q7hBest = d.q7hData.slice().sort(function(a, b) { return b.q7h_s - a.q7h_s; })[0];
+    var u7sBest = d.q7hData.slice().sort(function(a, b) { return b.u7s_s - a.u7s_s; })[0];
+    var text = 'Q7H ' + totalQ7H + '台 vs U7S-PRO ' + totalU7S + '台，控比' + ratio + 'x。';
+    text += 'Q7H最大战场：' + (q7hBest ? q7hBest.branch + '（' + q7hBest.q7h_s + '台）' : '--') + '；';
+    text += 'U7S-PRO主力在' + (u7sBest ? u7sBest.branch + '（' + u7sBest.u7s_s + '台）' : '--') + '。';
+    var q7hZeros = d.q7hData.filter(function(r) { return r.u7s_s === 0; }).map(function(r) { return r.branch; });
+    if (q7hZeros.length > 0) {
+      text += ' ' + q7hZeros.join('、') + 'U7S-PRO为0，Q7H已占领。';
+    }
+    el.textContent = text;
   }
 
   // Initial render
