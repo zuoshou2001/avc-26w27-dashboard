@@ -219,7 +219,21 @@ footer {
   <span class="nav-sep">|</span>
   <a href="#q7h-compare">Q7H对比</a>
   <a href="national.html" style="color:var(--accent);font-weight:700;background:#fef2f2;padding:4px 10px;border-radius:4px;margin-left:8px;font-size:0.72rem">全国趋势 →</a>
-  <select id="week-selector" style="margin-left:auto">
+  <select id="branch-selector" style="margin-left:auto;margin-right:4px">
+    <option value="南部全部" selected>南部全部</option>
+    <option value="深圳">深圳</option>
+    <option value="广州">广州</option>
+    <option value="佛山">佛山</option>
+    <option value="海南">海南</option>
+    <option value="云南">云南</option>
+    <option value="滇南">滇南</option>
+    <option value="闽北">闽北</option>
+    <option value="闽南">闽南</option>
+    <option value="桂北">桂北</option>
+    <option value="桂南">桂南</option>
+    <option value="汕头">汕头</option>
+  </select>
+  <select id="week-selector" style="margin-left:4px">
     <option value="26W27" selected>26W27</option>
     <option value="26W26">26W26</option>
     <option value="26W25">26W25</option>
@@ -248,7 +262,7 @@ footer {
     <option value="26W02">26W02</option>
     <option value="26W01">26W01</option>
   </select>
-  <select id="month-selector" style="margin-left:auto;display:none">
+  <select id="month-selector" style="margin-left:4px;display:none">
     <option value="7月" selected>7月</option>
     <option value="6月">6月</option>
     <option value="5月">5月</option>

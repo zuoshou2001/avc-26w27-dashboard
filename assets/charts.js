@@ -14,6 +14,7 @@
   var allCharts = [];
   var currentMode = 'weekly';
   var currentKey = '26W27';
+  var currentBranch = '南部全部';
 
   // Week date ranges (approximate: each week = 7 days from 26W01 start 2025-12-29)
   var WEEK_START = new Date(2025, 11, 29); // 26W01 starts Dec 29, 2025
@@ -34,10 +35,20 @@
   };
 
   function getData() {
-    if (currentMode === 'weekly') {
-      return DASHBOARD_ALL.data[currentKey] || DASHBOARD_ALL.data['26W27'];
+    if (currentBranch === '南部全部') {
+      if (currentMode === 'weekly') {
+        return DASHBOARD_ALL.data[currentKey] || DASHBOARD_ALL.data['26W27'];
+      } else {
+        return DASHBOARD_ALL.monthly[currentKey] || DASHBOARD_ALL.monthly['7月'];
+      }
     } else {
-      return DASHBOARD_ALL.monthly[currentKey] || DASHBOARD_ALL.monthly['7月'];
+      if (currentMode === 'weekly') {
+        var bw = DASHBOARD_ALL.branchData[currentKey];
+        return bw ? bw[currentBranch] : null;
+      } else {
+        var bm = DASHBOARD_ALL.branchMonthly[currentKey];
+        return bm ? bm[currentBranch] : null;
+      }
     }
   }
 
@@ -45,7 +56,12 @@
     var headerWeek = document.getElementById('header-week');
     var headerDate = document.getElementById('header-date');
     var headerYoy = document.getElementById('header-yoy-ref');
+    var headerTitle = document.querySelector('.header h1');
+    var headerSub = document.querySelector('.header .sub');
     if (!headerWeek) return;
+
+    var branchLabel = currentBranch === '南部全部' ? '南部战区' : currentBranch + '分公司';
+    if (headerTitle) headerTitle.textContent = branchLabel + ' AVC ' + (currentMode === 'weekly' ? '周度' : '月度') + '市场分析看板';
 
     if (currentMode === 'weekly') {
       headerWeek.textContent = currentKey;
@@ -140,9 +156,10 @@
     }
 
     // Update badge text
+    var branchLabel = currentBranch === '南部全部' ? '南部战区' : currentBranch;
     var badges = document.querySelectorAll('.section-header .badge');
     badges.forEach(function(b) {
-      b.textContent = currentKey + ' 南部战区';
+      b.textContent = currentKey + ' ' + branchLabel;
     });
   }
 
@@ -152,7 +169,17 @@
     allCharts = [];
 
     var d = getData();
-    if (!d) return;
+    if (!d) {
+      // Show empty state
+      updateHeader();
+      var kpiCw = document.getElementById('kpi-cw');
+      if (kpiCw) kpiCw.innerHTML = '-<span class="delta down">万</span>';
+      var kpiMs = document.getElementById('kpi-ms');
+      if (kpiMs) kpiMs.textContent = '-';
+      document.getElementById('table-brand-body').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">该分公司在当前时间段暂无数据</td></tr>';
+      document.getElementById('ms-table-body').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">暂无数据</td></tr>';
+      return;
+    }
 
     updateHeader();
     updateKPIs(d);
@@ -220,8 +247,8 @@
         msHtml += '<td class="num">' + yoyStr + '</td>';
         msHtml += '<td class="num"><span class="tag ' + lTag + '">' + (r.lead_hx >= 0 ? '+' : '') + r.lead_hx.toFixed(1) + '万</span></td></tr>';
       });
-      // Totals row
-      if (d.totals) {
+      // Totals row (only when multiple branches)
+      if (d.totals && d.msData && d.msData.length > 1) {
         var tc = d.totals;
         msHtml += '<tr style="font-weight:700;background:rgba(0,153,255,0.04)"><td colspan="2">合计</td>';
         msHtml += '<td class="num">' + tc.cw.toFixed(2) + '</td>';
@@ -521,7 +548,8 @@
       if (d.totals.yoy !== undefined) {
         yoyStr = '，同比' + (d.totals.yoy >= 0 ? '+' : '') + (d.totals.yoy*100).toFixed(1) + '%';
       }
-      var insightHtml = '<h4>💡 关键洞察</h4><p>创维' + currentKey + '销额' + d.totals.cw.toFixed(1) + '万，市占率' + (d.totals.ms*100).toFixed(1) + '%' + yoyStr + '。';
+      var branchLabel = currentBranch === '南部全部' ? '南部战区' : currentBranch;
+      var insightHtml = '<h4>💡 关键洞察</h4><p>创维' + branchLabel + ' ' + currentKey + '销额' + d.totals.cw.toFixed(1) + '万，市占率' + (d.totals.ms*100).toFixed(1) + '%' + yoyStr + '。';
       insightHtml += '海信以' + d.totals.hx.toFixed(1) + '万领先，差距' + (d.totals.cw - d.totals.hx).toFixed(1) + '万。';
       if (d.totals.ms_25 !== undefined) {
         insightHtml += '同期' + (d.totals.ms_25*100).toFixed(1) + '%。';
@@ -575,6 +603,15 @@
     modeToggle.addEventListener('click', function() {
       var newMode = currentMode === 'weekly' ? 'monthly' : 'weekly';
       switchMode(newMode);
+    });
+  }
+
+  // Branch selector
+  var branchSelect = document.getElementById('branch-selector');
+  if (branchSelect) {
+    branchSelect.addEventListener('change', function() {
+      currentBranch = this.value;
+      renderAll();
     });
   }
 
