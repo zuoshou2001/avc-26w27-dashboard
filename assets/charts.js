@@ -13,7 +13,7 @@
 
   var allCharts = [];
   var currentMode = 'weekly';
-  var currentKey = '26W27';
+  var currentKey = '26W28';
   var currentBranch = '南部全部';
 
   // Week date ranges (approximate: each week = 7 days from 26W01 start 2025-12-29)
