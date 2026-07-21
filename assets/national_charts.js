@@ -222,7 +222,7 @@
       if (cw > bestCw) { bestCw = cw; bestBranch = b; }
     });
 
-    var text = '2026年南部战区26W01-26W27年度累计：创维销额' + allCw.toFixed(1) + '万，行业' + allHy.toFixed(1) + '万，市占率' + allMs + '%。';
+    var text = '2026年南部战区年度累计（' + DASHBOARD_ALL.allWeeks.length + '周）：创维销额' + allCw.toFixed(1) + '万，行业' + allHy.toFixed(1) + '万，市占率' + allMs + '%。';
     text += '海信' + allHx.toFixed(1) + '万，差距' + (allCw - allHx).toFixed(1) + '万。';
     text += '贡献最大的分公司是' + bestBranch + '（' + bestCw.toFixed(1) + '万）。';
     if (currentBranch !== '南部全部') {
@@ -737,7 +737,7 @@
   function renderBranchModelAnalysis() {
     // Update badge
     var badge = document.getElementById('sec6-badge');
-    if (badge) badge.textContent = '26W01-26W27 累计';
+    if (badge) badge.textContent = '26W01-26W' + DASHBOARD_ALL.allWeeks.length.toString().padStart(2,'0') + ' 累计';
 
     // Update title
     var title = document.getElementById('branch-top10-title');

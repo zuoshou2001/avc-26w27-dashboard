@@ -378,9 +378,9 @@
       allCharts.push(c2b);
     }
 
-    // MS table - always show all 11 branches for ranking
+    // MS table - always show all 11 branches, sorted by 市占率
     var allMsData = (currentMode === 'weekly' ? DASHBOARD_ALL.data : DASHBOARD_ALL.monthly)[currentKey];
-    var msDataForTable = (allMsData && allMsData.msData) ? allMsData.msData : d.msData;
+    var msDataForTable = (allMsData && allMsData.msData) ? allMsData.msData.slice().sort(function(a, b) { return b.cw_ms - a.cw_ms; }) : (d.msData ? d.msData.slice().sort(function(a, b) { return b.cw_ms - a.cw_ms; }) : null);
     if (msDataForTable) {
       var msHtml = '';
       msDataForTable.forEach(function(r, i) {

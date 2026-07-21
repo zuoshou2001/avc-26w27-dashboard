@@ -101,9 +101,9 @@ body {
 
 /* Tables */
 .table-wrap { overflow-x: auto; overflow-y: auto; max-height: 600px; }
-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; table-layout: fixed; }
+table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
 thead th { background: var(--bg2); padding: 10px 12px; text-align: left; font-weight: 600; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; border-bottom: 2px solid var(--rule); white-space: nowrap; }
-tbody td { padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+tbody td { padding: 10px 12px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
 tbody tr:hover { background: var(--bg2); }
 td.num { text-align: right; font-variant-numeric: tabular-nums; }
 td.rank { text-align: center; font-weight: 700; }
@@ -411,8 +411,11 @@ footer {
   <div class="two-col-6-4">
     <div class="table-wrap">
       <table>
+        <colgroup>
+          <col style="width:7%"><col style="width:9%"><col style="width:10%"><col style="width:11%"><col style="width:10%"><col style="width:10%"><col style="width:13%"><col style="width:30%">
+        </colgroup>
         <thead>
-          <tr><th style="width:50px">排名</th><th style="width:64px">品牌</th><th style="width:72px">销量</th><th style="width:80px">销额(万)</th><th style="width:76px">量市占率</th><th style="width:76px">额市占率</th><th style="width:90px">额市占率同比</th><th style="width:70px">均价</th></tr>
+          <tr><th>排名</th><th>品牌</th><th>销量</th><th>销额(万)</th><th>量市占率</th><th>额市占率</th><th>额市占率同比</th><th>均价</th></tr>
         </thead>
         <tbody id="table-brand-body"></tbody>
       </table>
@@ -428,13 +431,16 @@ footer {
 <div class="section" id="ms-overview">
   <div class="section-header">
     <h2>各分公司市占率 &amp; 达成率概览</h2>
-    <span class="badge">按创维销额排序</span>
+    <span class="badge">按市占率排名</span>
   </div>
 
   <div class="table-wrap">
     <table>
+      <colgroup>
+        <col style="width:7%"><col style="width:9%"><col style="width:12%"><col style="width:10%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:34%">
+      </colgroup>
       <thead>
-        <tr><th style="width:50px">排名</th><th style="width:64px">分公司</th><th style="width:82px">创维销额</th><th style="width:66px">市占率</th><th style="width:56px">目标</th><th style="width:66px">达成</th><th style="width:68px">同比</th><th style="width:86px">vs海信</th></tr>
+        <tr><th>排名</th><th>分公司</th><th>创维销额</th><th>市占率</th><th>目标</th><th>达成</th><th>同比</th><th>vs海信</th></tr>
       </thead>
       <tbody id="ms-table-body"></tbody>
     </table>
@@ -476,8 +482,11 @@ footer {
 
   <div class="table-wrap" style="margin-top:20px">
     <table>
-      <thead>
-        <tr><th style="width:64px">分公司</th><th style="width:72px">创维(台)</th><th style="width:72px">创维(万)</th><th style="width:72px">海信(台)</th><th style="width:72px">海信(万)</th><th style="width:68px">TCL(台)</th><th style="width:68px">TCL(万)</th><th style="width:80px">销控比HX</th><th style="width:80px">销控比TCL</th></tr>
+        <colgroup>
+          <col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:12%"><col style="width:14%"><col style="width:14%">
+        </colgroup>
+        <thead>
+        <tr><th>分公司</th><th>创维(台)</th><th>创维(万)</th><th>海信(台)</th><th>海信(万)</th><th>TCL(台)</th><th>TCL(万)</th><th>销控比HX</th><th>销控比TCL</th></tr>
       </thead>
       <tbody id="table-98-body"></tbody>
     </table>
@@ -499,7 +508,10 @@ footer {
   <div class="two-col-4-6">
     <div class="table-wrap">
       <table>
-        <thead><tr><th style="width:50px">#</th><th style="width:56px">品牌</th><th style="width:100px">型号</th><th style="width:60px">销量</th><th style="width:68px">量环比</th><th style="width:72px">销额(万)</th><th style="width:64px">均价</th></tr></thead>
+        <colgroup>
+          <col style="width:6%"><col style="width:8%"><col style="width:18%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:40%">
+        </colgroup>
+        <thead><tr><th>#</th><th>品牌</th><th>型号</th><th>销量</th><th>量环比</th><th>销额(万)</th><th>均价</th></tr></thead>
         <tbody id="table-top20-body"></tbody>
       </table>
     </div>
@@ -568,25 +580,37 @@ footer {
   <div class="chart-grid">
     <div class="table-wrap">
       <table>
-        <thead><tr><th style="width:50px">#</th><th style="width:56px">品牌</th><th style="width:90px">80吋+ 型号</th><th style="width:56px">销量</th><th style="width:72px">销额(万)</th><th style="width:64px">均价</th></tr></thead>
+        <colgroup>
+          <col style="width:7%"><col style="width:9%"><col style="width:20%"><col style="width:9%"><col style="width:12%"><col style="width:43%">
+        </colgroup>
+        <thead><tr><th>#</th><th>品牌</th><th>80吋+ 型号</th><th>销量</th><th>销额(万)</th><th>均价</th></tr></thead>
         <tbody id="table-size80-body"></tbody>
       </table>
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th style="width:50px">#</th><th style="width:56px">品牌</th><th style="width:90px">75-77吋 型号</th><th style="width:56px">销量</th><th style="width:72px">销额(万)</th><th style="width:64px">均价</th></tr></thead>
+        <colgroup>
+          <col style="width:7%"><col style="width:9%"><col style="width:20%"><col style="width:9%"><col style="width:12%"><col style="width:43%">
+        </colgroup>
+        <thead><tr><th>#</th><th>品牌</th><th>75-77吋 型号</th><th>销量</th><th>销额(万)</th><th>均价</th></tr></thead>
         <tbody id="table-size75-body"></tbody>
       </table>
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th style="width:50px">#</th><th style="width:56px">品牌</th><th style="width:90px">65吋 型号</th><th style="width:56px">销量</th><th style="width:72px">销额(万)</th><th style="width:64px">均价</th></tr></thead>
+        <colgroup>
+          <col style="width:7%"><col style="width:9%"><col style="width:20%"><col style="width:9%"><col style="width:12%"><col style="width:43%">
+        </colgroup>
+        <thead><tr><th>#</th><th>品牌</th><th>65吋 型号</th><th>销量</th><th>销额(万)</th><th>均价</th></tr></thead>
         <tbody id="table-size65-body"></tbody>
       </table>
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th style="width:50px">#</th><th style="width:56px">品牌</th><th style="width:90px">55吋及以下 型号</th><th style="width:56px">销量</th><th style="width:72px">销额(万)</th><th style="width:64px">均价</th></tr></thead>
+        <colgroup>
+          <col style="width:7%"><col style="width:9%"><col style="width:20%"><col style="width:9%"><col style="width:12%"><col style="width:43%">
+        </colgroup>
+        <thead><tr><th>#</th><th>品牌</th><th>55吋及以下 型号</th><th>销量</th><th>销额(万)</th><th>均价</th></tr></thead>
         <tbody id="table-size55-body"></tbody>
       </table>
     </div>
@@ -607,7 +631,10 @@ footer {
     </figure>
     <div class="table-wrap">
       <table>
-        <thead><tr><th style="width:64px">分公司</th><th style="width:68px">Q7H销量</th><th style="width:72px">Q7H销额</th><th style="width:72px">U7S-PRO</th><th style="width:82px">U7S-PRO销额</th><th style="width:56px">控比</th></tr></thead>
+        <colgroup>
+          <col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:16%"><col style="width:28%">
+        </colgroup>
+        <thead><tr><th>分公司</th><th>Q7H销量</th><th>Q7H销额</th><th>U7S-PRO</th><th>U7S-PRO销额</th><th>控比</th></tr></thead>
         <tbody id="table-q7h-body"></tbody>
       </table>
     </div>
