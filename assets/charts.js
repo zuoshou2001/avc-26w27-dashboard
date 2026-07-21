@@ -159,7 +159,7 @@
     // TOC grid: 6 columns when branch, 5 when all
     var tocGrid = document.getElementById('toc-grid');
     if (tocGrid) {
-      tocGrid.style.gridTemplateColumns = isBranch ? 'repeat(6, 1fr)' : 'repeat(5, 1fr)';
+      tocGrid.style.gridTemplateColumns = isBranch ? 'repeat(7, 1fr)' : 'repeat(6, 1fr)';
     }
 
     // Update badge text
@@ -899,7 +899,6 @@
       setTimeout(function() {
         html2canvas(document.body, {
           useCORS: true,
-          allowTaint: true,
           scale: 2,
           backgroundColor: '#ffffff',
           logging: false,
@@ -910,21 +909,19 @@
           chartParents.forEach(function(p) {
             p.parent.replaceChild(p.original, p.img);
           });
-          // Re-init charts
-          chartParents.forEach(function(p, i) {
+          // Re-init charts (dispose old then create new)
+          allCharts.forEach(function(c) { try { c.dispose(); } catch(e) {} });
+          allCharts = [];
+          chartParents.forEach(function(p) {
             var c = echarts.init(p.original, null, { renderer: 'svg' });
-            c.setOption(allCharts[i].getOption(), { notMerge: true });
-            allCharts[i] = c;
+            allCharts.push(c);
           });
+          // Re-render to populate chart options
+           renderAll();
 
           // Step 4: Restore hidden elements
           hiddenEls.forEach(function(el, i) { el.style.display = origStyles[i]; });
           body.style.background = origBg;
-
-          // Re-attach resize handler
-          window.addEventListener('resize', function() {
-            allCharts.forEach(function(c) { c.resize(); });
-          });
 
           // Step 5: Download
           var link = document.createElement('a');
@@ -943,20 +940,22 @@
           chartParents.forEach(function(p) {
             p.parent.replaceChild(p.original, p.img);
           });
-          chartParents.forEach(function(p, i) {
+          allCharts.forEach(function(c) { try { c.dispose(); } catch(e) {} });
+          allCharts = [];
+          chartParents.forEach(function(p) {
             var c = echarts.init(p.original, null, { renderer: 'svg' });
-            c.setOption(allCharts[i].getOption(), { notMerge: true });
-            allCharts[i] = c;
+            allCharts.push(c);
           });
-          hiddenEls.forEach(function(el, i) { el.style.display = origStyles[i]; });
-          body.style.background = origBg;
-          exportBtn.textContent = '📷 导出长图';
-          exportBtn.disabled = false;
-          exportBtn.style.opacity = '1';
-          console.error('Screenshot failed:', err);
-          alert('导出失败，请重试。');
+          renderAll();
+           hiddenEls.forEach(function(el, i) { el.style.display = origStyles[i]; });
+           body.style.background = origBg;
+           exportBtn.textContent = '📷 导出长图';
+           exportBtn.disabled = false;
+           exportBtn.style.opacity = '1';
+           console.error('Screenshot failed:', err);
+           alert('导出失败，请重试。');
         });
-      }, 800);
+      }, 500);
     });
   }
 
