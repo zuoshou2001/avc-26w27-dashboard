@@ -378,16 +378,20 @@
       allCharts.push(c2b);
     }
 
-    // MS table
-    if (d.msData) {
+    // MS table - always show all 11 branches for ranking
+    var allMsData = (currentMode === 'weekly' ? DASHBOARD_ALL.data : DASHBOARD_ALL.monthly)[currentKey];
+    var msDataForTable = (allMsData && allMsData.msData) ? allMsData.msData : d.msData;
+    if (msDataForTable) {
       var msHtml = '';
-      d.msData.forEach(function(r, i) {
+      msDataForTable.forEach(function(r, i) {
         var rd = i === 0 ? 'rd-1' : i === 1 ? 'rd-2' : i === 2 ? 'rd-3' : 'rd-o';
         var aTag = r.achieve >= 1.0 ? 'tag-green' : r.achieve >= 0.9 ? 'tag-yellow' : 'tag-red';
         var lTag = r.lead_hx >= 0 ? 'tag-green' : 'tag-red';
         var yTag = (r.yoy || 0) >= 0 ? 'tag-green' : 'tag-red';
         var yoyStr = r.yoy !== undefined ? ('<span class="tag ' + yTag + '">' + (r.yoy >= 0 ? '+' : '') + (r.yoy*100).toFixed(1) + '%</span>') : '-';
-        msHtml += '<tr><td class="rank"><span class="rank-dot ' + rd + '">' + (i+1) + '</span></td>';
+        var isSelected = r.branch === currentBranch;
+        msHtml += '<tr' + (isSelected ? ' style="background:rgba(230,57,70,0.08);font-weight:700"' : '') + '>';
+        msHtml += '<td class="rank"><span class="rank-dot ' + rd + '">' + (i+1) + '</span></td>';
         msHtml += '<td><strong>' + r.branch + '</strong></td>';
         msHtml += '<td class="num">' + r.cw.toFixed(2) + '</td>';
         msHtml += '<td class="num"><strong>' + (r.cw_ms*100).toFixed(1) + '%</strong></td>';
@@ -396,9 +400,9 @@
         msHtml += '<td class="num">' + yoyStr + '</td>';
         msHtml += '<td class="num"><span class="tag ' + lTag + '">' + (r.lead_hx >= 0 ? '+' : '') + r.lead_hx.toFixed(1) + '万</span></td></tr>';
       });
-      // Totals row (only when multiple branches)
-      if (d.totals && d.msData && d.msData.length > 1) {
-        var tc = d.totals;
+      // Totals row
+      if (allMsData && allMsData.totals && msDataForTable.length > 1) {
+        var tc = allMsData.totals;
         msHtml += '<tr style="font-weight:700;background:rgba(0,153,255,0.04)"><td colspan="2">合计</td>';
         msHtml += '<td class="num">' + tc.cw.toFixed(2) + '</td>';
         msHtml += '<td class="num">' + (tc.ms*100).toFixed(1) + '%</td>';
@@ -415,9 +419,9 @@
     // ========== CHARTS ==========
     // CHART 1: MS vs Achieve
     var c1El = document.getElementById('chart-ms-achieve');
-    if (c1El && d.msData) {
+    if (c1El && msDataForTable) {
       var c1 = echarts.init(c1El, null, { renderer: 'svg' });
-      var mx = d.msData.map(function(r) { return r.branch; }), my1 = d.msData.map(function(r) { return +(r.cw_ms*100).toFixed(1); }), my2 = d.msData.map(function(r) { return +(r.achieve*100).toFixed(1); });
+      var mx = msDataForTable.map(function(r) { return r.branch; }), my1 = msDataForTable.map(function(r) { return +(r.cw_ms*100).toFixed(1); }), my2 = msDataForTable.map(function(r) { return +(r.achieve*100).toFixed(1); });
       c1.setOption({
         animation: false, tooltip: { trigger: 'axis', appendToBody: true },
         legend: { data: ['市占率%', '达成率%'], bottom: 0, textStyle: { color: ink, fontSize: 10 } },
@@ -435,9 +439,9 @@
 
     // CHART 2: YoY
     var c2El = document.getElementById('chart-yoy');
-    if (c2El && d.msData && d.msData[0].yoy !== undefined) {
+    if (c2El && msDataForTable && msDataForTable[0].yoy !== undefined) {
       var c2 = echarts.init(c2El, null, { renderer: 'svg' });
-      var yoyData = d.msData.map(function(r) { return { name: r.branch, value: +(r.yoy * 100).toFixed(2) }; });
+      var yoyData = msDataForTable.map(function(r) { return { name: r.branch, value: +(r.yoy * 100).toFixed(2) }; });
       var yoyX = yoyData.map(function(r) { return r.name; }), yoyY = yoyData.map(function(r) { return r.value; });
       c2.setOption({
         animation: false, tooltip: { trigger: 'axis', appendToBody: true, formatter: function(p) { return p[0].name + '<br/>同比: ' + (p[0].value >= 0 ? '+' : '') + p[0].value + '%'; } },
@@ -698,7 +702,9 @@
 
   function renderInsightMS(d) {
     var el = document.getElementById('insight-ms-overview-text');
-    if (!el || !d.totals || !d.msData) return;
+    if (!el || !d.totals) return;
+    var allMsData = (currentMode === 'weekly' ? DASHBOARD_ALL.data : DASHBOARD_ALL.monthly)[currentKey];
+    var msD = (allMsData && allMsData.msData) ? allMsData.msData : (d.msData || []);
     var branchLabel = currentBranch === '南部全部' ? '南部战区' : currentBranch;
     var yoyStr = '';
     if (d.totals.yoy !== undefined) {
@@ -709,11 +715,11 @@
     if (d.totals.ms_25 !== undefined) {
       text += '同期25年市占率' + (d.totals.ms_25*100).toFixed(1) + '%。';
     }
-    if (d.msData.length > 1) {
-      var above = d.msData.filter(function(r) { return r.achieve >= 1; }).length;
-      var below = d.msData.length - above;
-      var best = d.msData[0];
-      var worst = d.msData[d.msData.length - 1];
+    if (msD.length > 1) {
+      var above = msD.filter(function(r) { return r.achieve >= 1; }).length;
+      var below = msD.length - above;
+      var best = msD[0];
+      var worst = msD[msD.length - 1];
       text += ' ' + above + '个分公司达成率超100%，' + best.branch + '（' + (best.cw_ms*100).toFixed(1) + '%）表现最佳，' + worst.branch + '（' + (worst.cw_ms*100).toFixed(1) + '%）需重点关注。';
     }
     el.textContent = text;
@@ -848,10 +854,32 @@
       exportBtn.disabled = true;
       exportBtn.style.opacity = '0.6';
 
+      // Step 0: Hide UI elements for clean report capture
+      var navBar = document.querySelector('.nav-bar');
+      var tocGrid = document.getElementById('toc-grid');
+      var branchSel = document.getElementById('branch-selector');
+      var weekSel = document.getElementById('week-selector');
+      var monthSel = document.getElementById('month-selector');
+      var modeToggle = document.getElementById('mode-toggle');
+      var footer = document.querySelector('footer');
+      var hiddenEls = [];
+      var origStyles = [];
+      function hide(el) {
+        if (el) { hiddenEls.push(el); origStyles.push(el.style.display); el.style.display = 'none'; }
+      }
+      hide(navBar); hide(tocGrid); hide(branchSel); hide(weekSel); hide(monthSel); hide(modeToggle); hide(exportBtn);
+      // Hide footer text but keep structure
+      if (footer) { hiddenEls.push(footer); origStyles.push(footer.style.display); footer.style.display = 'none'; }
+
+      // Add export watermark
+      var body = document.body;
+      var origBg = body.style.background;
+      body.style.background = '#ffffff';
+
       // Step 1: Convert all ECharts to images
       var chartImgs = [];
       var chartParents = [];
-      allCharts.forEach(function(chartel, i) {
+      allCharts.forEach(function(chartel) {
         var dom = chartel.getDom();
         if (dom && dom.parentNode) {
           var dataUrl = chartel.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#fff' });
@@ -867,19 +895,16 @@
         }
       });
 
-      // Step 2: Capture with html2canvas
+      // Step 2: Capture full body
       setTimeout(function() {
-        var captureEl = document.querySelector('.container');
-        if (!captureEl) captureEl = document.body;
-
-        html2canvas(captureEl, {
+        html2canvas(document.body, {
           useCORS: true,
           allowTaint: true,
           scale: 2,
-          backgroundColor: '#f5f7fa',
+          backgroundColor: '#ffffff',
           logging: false,
-          windowWidth: captureEl.scrollWidth,
-          windowHeight: captureEl.scrollHeight
+          windowWidth: document.body.scrollWidth,
+          windowHeight: document.body.scrollHeight
         }).then(function(canvas) {
           // Step 3: Restore original charts
           chartParents.forEach(function(p) {
@@ -891,15 +916,22 @@
             c.setOption(allCharts[i].getOption(), { notMerge: true });
             allCharts[i] = c;
           });
+
+          // Step 4: Restore hidden elements
+          hiddenEls.forEach(function(el, i) { el.style.display = origStyles[i]; });
+          body.style.background = origBg;
+
+          // Re-attach resize handler
           window.addEventListener('resize', function() {
             allCharts.forEach(function(c) { c.resize(); });
           });
 
-          // Step 4: Download
+          // Step 5: Download
           var link = document.createElement('a');
           var now = new Date();
           var ts = now.getFullYear() + '-' + (now.getMonth()+1).toString().padStart(2,'0') + '-' + now.getDate().toString().padStart(2,'0');
-          link.download = '南部战区_AVC看板_' + currentKey + '_' + ts + '.png';
+          var branchLabel = currentBranch === '南部全部' ? '南部战区' : currentBranch;
+          link.download = branchLabel + '_AVC看板_' + currentKey + '_' + ts + '.png';
           link.href = canvas.toDataURL('image/png');
           link.click();
 
@@ -916,13 +948,15 @@
             c.setOption(allCharts[i].getOption(), { notMerge: true });
             allCharts[i] = c;
           });
+          hiddenEls.forEach(function(el, i) { el.style.display = origStyles[i]; });
+          body.style.background = origBg;
           exportBtn.textContent = '📷 导出长图';
           exportBtn.disabled = false;
           exportBtn.style.opacity = '1';
           console.error('Screenshot failed:', err);
           alert('导出失败，请重试。');
         });
-      }, 500);
+      }, 800);
     });
   }
 
