@@ -13,7 +13,7 @@
 
   var allCharts = [];
   var currentMode = 'weekly';
-  var currentKey = '26W28';
+  var currentKey = '26W29';
   var currentBranch = '南部全部';
 
   // Week date ranges (approximate: each week = 7 days from 26W01 start 2025-12-29)
@@ -837,6 +837,92 @@
     branchSelect.addEventListener('change', function() {
       currentBranch = this.value;
       renderAll();
+    });
+  }
+
+  // Screenshot export
+  var exportBtn = document.getElementById('export-screenshot');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', function() {
+      exportBtn.textContent = '⏳ 生成中...';
+      exportBtn.disabled = true;
+      exportBtn.style.opacity = '0.6';
+
+      // Step 1: Convert all ECharts to images
+      var chartImgs = [];
+      var chartParents = [];
+      allCharts.forEach(function(chartel, i) {
+        var dom = chartel.getDom();
+        if (dom && dom.parentNode) {
+          var dataUrl = chartel.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#fff' });
+          var img = document.createElement('img');
+          img.src = dataUrl;
+          img.style.width = dom.style.width || dom.offsetWidth + 'px';
+          img.style.height = dom.style.height || dom.offsetHeight + 'px';
+          img.style.display = 'block';
+          img.className = 'screenshot-replace';
+          chartParents.push({ parent: dom.parentNode, original: dom, img: img });
+          dom.parentNode.replaceChild(img, dom);
+          chartImgs.push(img);
+        }
+      });
+
+      // Step 2: Capture with html2canvas
+      setTimeout(function() {
+        var captureEl = document.querySelector('.container');
+        if (!captureEl) captureEl = document.body;
+
+        html2canvas(captureEl, {
+          useCORS: true,
+          allowTaint: true,
+          scale: 2,
+          backgroundColor: '#f5f7fa',
+          logging: false,
+          windowWidth: captureEl.scrollWidth,
+          windowHeight: captureEl.scrollHeight
+        }).then(function(canvas) {
+          // Step 3: Restore original charts
+          chartParents.forEach(function(p) {
+            p.parent.replaceChild(p.original, p.img);
+          });
+          // Re-init charts
+          chartParents.forEach(function(p, i) {
+            var c = echarts.init(p.original, null, { renderer: 'svg' });
+            c.setOption(allCharts[i].getOption(), { notMerge: true });
+            allCharts[i] = c;
+          });
+          window.addEventListener('resize', function() {
+            allCharts.forEach(function(c) { c.resize(); });
+          });
+
+          // Step 4: Download
+          var link = document.createElement('a');
+          var now = new Date();
+          var ts = now.getFullYear() + '-' + (now.getMonth()+1).toString().padStart(2,'0') + '-' + now.getDate().toString().padStart(2,'0');
+          link.download = '南部战区_AVC看板_' + currentKey + '_' + ts + '.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+
+          exportBtn.textContent = '📷 导出长图';
+          exportBtn.disabled = false;
+          exportBtn.style.opacity = '1';
+        }).catch(function(err) {
+          // Restore on error too
+          chartParents.forEach(function(p) {
+            p.parent.replaceChild(p.original, p.img);
+          });
+          chartParents.forEach(function(p, i) {
+            var c = echarts.init(p.original, null, { renderer: 'svg' });
+            c.setOption(allCharts[i].getOption(), { notMerge: true });
+            allCharts[i] = c;
+          });
+          exportBtn.textContent = '📷 导出长图';
+          exportBtn.disabled = false;
+          exportBtn.style.opacity = '1';
+          console.error('Screenshot failed:', err);
+          alert('导出失败，请重试。');
+        });
+      }, 500);
     });
   }
 

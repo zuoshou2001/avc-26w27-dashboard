@@ -219,6 +219,7 @@ footer {
   <span class="nav-sep">|</span>
   <a href="#q7h-compare">Q7H对比</a>
   <a href="national.html" style="color:var(--accent);font-weight:700;background:#fef2f2;padding:4px 10px;border-radius:4px;margin-left:8px;font-size:0.72rem">南部趋势 →</a>
+  <button id="export-screenshot" style="margin-left:6px;padding:4px 12px;font-size:0.72rem;font-weight:600;border:1px solid var(--accent);border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap">📷 导出长图</button>
   <select id="branch-selector" style="margin-left:auto;margin-right:4px">
     <option value="南部全部" selected>南部全部</option>
     <option value="深圳">深圳</option>
@@ -234,7 +235,8 @@ footer {
     <option value="汕头">汕头</option>
   </select>
   <select id="week-selector" style="margin-left:4px">
-    <option value="26W28" selected>26W28</option>
+    <option value="26W29" selected>26W29</option>
+    <option value="26W28">26W28</option>
     <option value="26W27">26W27</option>
     <option value="26W26">26W26</option>
     <option value="26W25">26W25</option>
@@ -623,6 +625,7 @@ footer {
 </footer>
 
 <script src="assets/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="assets/all_data.js"></script>
 <script>
 // Scroll spy for nav
