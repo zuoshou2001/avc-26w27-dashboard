@@ -102,7 +102,7 @@ body {
 /* Tables */
 .table-wrap { overflow-x: auto; overflow-y: auto; max-height: 600px; }
 table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
-thead th { background: var(--bg2); padding: 10px 12px; text-align: left; font-weight: 600; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; border-bottom: 2px solid var(--rule); white-space: nowrap; }
+thead th { background: var(--bg2); padding: 10px 12px; text-align: center; font-weight: 600; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; border-bottom: 2px solid var(--rule); white-space: nowrap; }
 tbody td { padding: 10px 12px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
 tbody tr:hover { background: var(--bg2); }
 td.num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -115,12 +115,13 @@ td.rank { text-align: center; font-weight: 700; }
 
 /* === New Ranking Table Style === */
 .ranking-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: 0.83rem; }
-.ranking-table thead th { background: transparent; padding: 8px 14px; text-align: left; font-weight: 600; color: var(--muted); font-size: 0.7rem; text-transform: uppercase; border-bottom: none; white-space: nowrap; }
+.ranking-table thead th { background: transparent; padding: 8px 14px; text-align: center; font-weight: 600; color: var(--muted); font-size: 0.7rem; text-transform: uppercase; border-bottom: none; white-space: nowrap; }
 .ranking-table tbody tr { background: var(--bg); border-radius: 8px; transition: all 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
 .ranking-table tbody tr:hover { background: #fafbfc; box-shadow: 0 3px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
 .ranking-table tbody tr.row-cw { background: linear-gradient(135deg, rgba(230,57,70,0.06) 0%, rgba(230,57,70,0.02) 100%); box-shadow: inset 3px 0 0 var(--accent); }
 .ranking-table tbody tr.row-selected { background: rgba(230,57,70,0.08); box-shadow: 0 2px 8px rgba(230,57,70,0.12); }
-.ranking-table td { padding: 12px 14px; border-bottom: none; white-space: nowrap; vertical-align: middle; }
+.ranking-table td { padding: 12px 14px; border-bottom: none; white-space: nowrap; vertical-align: middle; text-align: center; }
+.ranking-table td.num { text-align: center; }
 .ranking-table td:first-child { border-radius: 8px 0 0 8px; padding-left: 16px; }
 .ranking-table td:last-child { border-radius: 0 8px 8px 0; padding-right: 16px; }
 .ranking-table .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; color: #fff; }
@@ -134,10 +135,10 @@ td.rank { text-align: center; font-weight: 700; }
 .ranking-table .metric-value { font-weight: 600; }
 .ranking-table .trend-up { color: var(--green); }
 .ranking-table .trend-down { color: var(--accent); }
-.ranking-table .ms-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.ranking-table .ms-bar-wrap { display: flex; align-items: center; gap: 8px; justify-content: center; }
 .ranking-table .ms-bar { height: 8px; border-radius: 4px; background: var(--accent); transition: width 0.3s; }
 .ranking-table .ms-bar-bg { flex: 1; height: 8px; border-radius: 4px; background: var(--bg2); overflow: hidden; }
-.ranking-table .achieve-ring { display: inline-flex; align-items: center; gap: 4px; }
+.ranking-table .achieve-ring { display: inline-flex; align-items: center; gap: 4px; justify-content: center; }
 .ranking-table .achieve-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .ranking-table .achieve-dot.high { background: var(--green); }
 .ranking-table .achieve-dot.mid { background: var(--orange); }
@@ -467,7 +468,7 @@ footer {
   <div class="table-wrap">
     <table class="ranking-table">
       <thead>
-        <tr><th>排名</th><th>分公司</th><th>创维销额</th><th>市占率</th><th>目标</th><th>达成</th><th>同比</th><th>vs海信</th></tr>
+        <tr><th>排名</th><th>分公司</th><th>创维销额</th><th>市占率</th><th>目标</th><th>达成</th><th>同比</th><th>vs海信</th><th>创维排名</th></tr>
       </thead>
       <tbody id="ms-table-body"></tbody>
     </table>

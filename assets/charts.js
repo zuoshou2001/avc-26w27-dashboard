@@ -383,6 +383,16 @@
     // MS table - new ranking style, always show all 11 branches, sorted by 市占率
     var allMsData = (currentMode === 'weekly' ? DASHBOARD_ALL.data : DASHBOARD_ALL.monthly)[currentKey];
     var msDataForTable = (allMsData && allMsData.msData) ? allMsData.msData.slice().sort(function(a, b) { return b.cw_ms - a.cw_ms; }) : (d.msData ? d.msData.slice().sort(function(a, b) { return b.cw_ms - a.cw_ms; }) : null);
+    // Helper: get 创维 rank within a branch
+    function getCWRank(branch) {
+      var bw = DASHBOARD_ALL.branchData[currentKey];
+      if (!bw || !bw[branch] || !bw[branch].brandOverview) return '--';
+      var bo = bw[branch].brandOverview;
+      for (var j = 0; j < bo.length; j++) {
+        if (bo[j].brand === '创维') return bo[j].rank;
+      }
+      return '--';
+    }
     if (msDataForTable) {
       var msHtml = '';
       msDataForTable.forEach(function(r, i) {
@@ -394,6 +404,11 @@
         var yoyStr = r.yoy !== undefined ? ('<span class="' + yTag + '">' + yoyArrow + ' ' + (r.yoy >= 0 ? '+' : '') + (r.yoy*100).toFixed(1) + '%</span>') : '-';
         var isSelected = r.branch === currentBranch;
         var msPct = (r.cw_ms*100).toFixed(1);
+        var cwRank = getCWRank(r.branch);
+        var cwRankStr = cwRank === 1 ? '<span class="rank-badge rank-gold" style="font-size:0.7rem;width:26px;height:26px">1</span>' :
+                        cwRank === 2 ? '<span class="rank-badge rank-silver" style="font-size:0.7rem;width:26px;height:26px">2</span>' :
+                        cwRank === 3 ? '<span class="rank-badge rank-bronze" style="font-size:0.7rem;width:26px;height:26px">3</span>' :
+                        '<span class="rank-badge rank-normal" style="font-size:0.7rem;width:26px;height:26px">' + cwRank + '</span>';
         msHtml += '<tr class="' + (isSelected ? 'row-selected' : '') + '">';
         msHtml += '<td><span class="rank-badge ' + rankClass + '">' + (i+1) + '</span></td>';
         msHtml += '<td><span class="brand-name">' + r.branch + '</span></td>';
@@ -402,7 +417,8 @@
         msHtml += '<td class="num">' + (r.target*100).toFixed(1) + '%</td>';
         msHtml += '<td class="num"><span class="achieve-ring"><span class="achieve-dot ' + aTag + '"></span>' + (r.achieve*100).toFixed(1) + '%</span></td>';
         msHtml += '<td class="num">' + yoyStr + '</td>';
-        msHtml += '<td class="num"><span class="vs-badge ' + lTag + '">' + (r.lead_hx >= 0 ? '+' : '') + r.lead_hx.toFixed(1) + '万</span></td></tr>';
+        msHtml += '<td class="num"><span class="vs-badge ' + lTag + '">' + (r.lead_hx >= 0 ? '+' : '') + r.lead_hx.toFixed(1) + '万</span></td>';
+        msHtml += '<td>' + cwRankStr + '</td></tr>';
       });
       // Totals row
       if (allMsData && allMsData.totals && msDataForTable.length > 1) {
@@ -417,7 +433,8 @@
         var tyArrow = (tc.yoy || 0) >= 0 ? '▲' : '▼';
         var tyStr = tc.yoy !== undefined ? ('<span class="' + tyTag + '">' + tyArrow + ' ' + (tc.yoy >= 0 ? '+' : '') + (tc.yoy*100).toFixed(1) + '%</span>') : '-';
         msHtml += '<td class="num">' + tyStr + '</td>';
-        msHtml += '<td class="num"><span class="vs-badge negative">' + (tc.cw - tc.hx).toFixed(1) + '万</span></td></tr>';
+        msHtml += '<td class="num"><span class="vs-badge negative">' + (tc.cw - tc.hx).toFixed(1) + '万</span></td>';
+        msHtml += '<td>-</td></tr>';
       }
       document.getElementById('ms-table-body').innerHTML = msHtml;
     }
