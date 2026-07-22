@@ -113,6 +113,39 @@ td.rank { text-align: center; font-weight: 700; }
 .rd-3 { background: var(--blue); }
 .rd-o { background: #94a3b8; }
 
+/* === New Ranking Table Style === */
+.ranking-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: 0.83rem; }
+.ranking-table thead th { background: transparent; padding: 8px 14px; text-align: left; font-weight: 600; color: var(--muted); font-size: 0.7rem; text-transform: uppercase; border-bottom: none; white-space: nowrap; }
+.ranking-table tbody tr { background: var(--bg); border-radius: 8px; transition: all 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.ranking-table tbody tr:hover { background: #fafbfc; box-shadow: 0 3px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
+.ranking-table tbody tr.row-cw { background: linear-gradient(135deg, rgba(230,57,70,0.06) 0%, rgba(230,57,70,0.02) 100%); box-shadow: inset 3px 0 0 var(--accent); }
+.ranking-table tbody tr.row-selected { background: rgba(230,57,70,0.08); box-shadow: 0 2px 8px rgba(230,57,70,0.12); }
+.ranking-table td { padding: 12px 14px; border-bottom: none; white-space: nowrap; vertical-align: middle; }
+.ranking-table td:first-child { border-radius: 8px 0 0 8px; padding-left: 16px; }
+.ranking-table td:last-child { border-radius: 0 8px 8px 0; padding-right: 16px; }
+.ranking-table .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; color: #fff; }
+.ranking-table .rank-gold { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.ranking-table .rank-silver { background: linear-gradient(135deg, #94a3b8, #64748b); }
+.ranking-table .rank-bronze { background: linear-gradient(135deg, #d97706, #b45309); }
+.ranking-table .rank-normal { background: #cbd5e1; color: #475569; }
+.ranking-table .brand-name { font-weight: 700; font-size: 0.88rem; }
+.ranking-table .brand-name.cw { color: var(--accent); }
+.ranking-table .metric-label { font-size: 0.68rem; color: var(--muted); display: block; }
+.ranking-table .metric-value { font-weight: 600; }
+.ranking-table .trend-up { color: var(--green); }
+.ranking-table .trend-down { color: var(--accent); }
+.ranking-table .ms-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.ranking-table .ms-bar { height: 8px; border-radius: 4px; background: var(--accent); transition: width 0.3s; }
+.ranking-table .ms-bar-bg { flex: 1; height: 8px; border-radius: 4px; background: var(--bg2); overflow: hidden; }
+.ranking-table .achieve-ring { display: inline-flex; align-items: center; gap: 4px; }
+.ranking-table .achieve-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.ranking-table .achieve-dot.high { background: var(--green); }
+.ranking-table .achieve-dot.mid { background: var(--orange); }
+.ranking-table .achieve-dot.low { background: var(--accent); }
+.ranking-table .vs-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+.ranking-table .vs-badge.positive { background: #f0fdf4; color: var(--green); }
+.ranking-table .vs-badge.negative { background: #fef2f2; color: var(--accent); }
+
 .tag { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; }
 .tag-red { background: #fef2f2; color: var(--accent); }
 .tag-green { background: #f0fdf4; color: var(--green); }
@@ -410,12 +443,9 @@ footer {
 
   <div class="two-col-6-4">
     <div class="table-wrap">
-      <table>
-        <colgroup>
-          <col style="width:7%"><col style="width:9%"><col style="width:10%"><col style="width:11%"><col style="width:10%"><col style="width:10%"><col style="width:13%"><col style="width:30%">
-        </colgroup>
+      <table class="ranking-table">
         <thead>
-          <tr><th>排名</th><th>品牌</th><th>销量</th><th>销额(万)</th><th>量市占率</th><th>额市占率</th><th>额市占率同比</th><th>均价</th></tr>
+          <tr><th>排名</th><th>品牌</th><th>销量</th><th>销额(万)</th><th>额市占率</th><th>额市占率同比</th><th>均价</th></tr>
         </thead>
         <tbody id="table-brand-body"></tbody>
       </table>
@@ -435,10 +465,7 @@ footer {
   </div>
 
   <div class="table-wrap">
-    <table>
-      <colgroup>
-        <col style="width:7%"><col style="width:9%"><col style="width:12%"><col style="width:10%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:34%">
-      </colgroup>
+    <table class="ranking-table">
       <thead>
         <tr><th>排名</th><th>分公司</th><th>创维销额</th><th>市占率</th><th>目标</th><th>达成</th><th>同比</th><th>vs海信</th></tr>
       </thead>

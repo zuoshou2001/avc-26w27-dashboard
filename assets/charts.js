@@ -324,7 +324,7 @@
       if (kpiCw) kpiCw.innerHTML = '-<span class="delta down">万</span>';
       var kpiMs = document.getElementById('kpi-ms');
       if (kpiMs) kpiMs.textContent = '-';
-      document.getElementById('table-brand-body').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">该分公司在当前时间段暂无数据</td></tr>';
+      document.getElementById('table-brand-body').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">该分公司在当前时间段暂无数据</td></tr>';
       document.getElementById('ms-table-body').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">暂无数据</td></tr>';
       return;
     }
@@ -335,20 +335,22 @@
     renderBranchDetail(d);
 
     // ========== TABLES ==========
-    // Brand overview table
+    // Brand overview table (new ranking style)
     if (d.brandOverview) {
       var boHtml = '';
       d.brandOverview.forEach(function(r) {
         var isCW = r.brand === '创维';
-        var yTag = (r.yoy_ms || 0) >= 0 ? 'tag-green' : 'tag-red';
-        var yoyStr = r.yoy_ms !== undefined ? ('<span class="tag ' + yTag + '">' + (r.yoy_ms >= 0 ? '+' : '') + (r.yoy_ms*100).toFixed(1) + '%</span>') : '-';
-        boHtml += '<tr' + (isCW ? ' style="background:rgba(0,153,255,0.06);font-weight:600"' : '') + '>';
-        boHtml += '<td class="rank"><span class="rank-dot rd-o">' + r.rank + '</span></td>';
-        boHtml += '<td><strong>' + r.brand + '</strong></td>';
-        boHtml += '<td class="num">' + r.sales.toLocaleString() + '</td>';
-        boHtml += '<td class="num">' + r.amount.toFixed(2) + '</td>';
-        boHtml += '<td class="num">' + (r.ms_sales*100).toFixed(1) + '%</td>';
-        boHtml += '<td class="num"><strong>' + (r.ms_amount*100).toFixed(1) + '%</strong></td>';
+        var rankClass = r.rank === 1 ? 'rank-gold' : r.rank === 2 ? 'rank-silver' : r.rank === 3 ? 'rank-bronze' : 'rank-normal';
+        var yTag = (r.yoy_ms || 0) >= 0 ? 'trend-up' : 'trend-down';
+        var yoyArrow = (r.yoy_ms || 0) >= 0 ? '▲' : '▼';
+        var yoyStr = r.yoy_ms !== undefined ? ('<span class="' + yTag + '">' + yoyArrow + ' ' + (r.yoy_ms >= 0 ? '+' : '') + (r.yoy_ms*100).toFixed(1) + '%</span>') : '-';
+        var msPct = (r.ms_amount*100).toFixed(1);
+        boHtml += '<tr class="' + (isCW ? 'row-cw' : '') + '">';
+        boHtml += '<td><span class="rank-badge ' + rankClass + '">' + r.rank + '</span></td>';
+        boHtml += '<td><span class="brand-name' + (isCW ? ' cw' : '') + '">' + r.brand + '</span></td>';
+        boHtml += '<td class="num metric-value">' + r.sales.toLocaleString() + '</td>';
+        boHtml += '<td class="num metric-value">' + r.amount.toFixed(2) + '</td>';
+        boHtml += '<td class="num"><div class="ms-bar-wrap"><span style="font-weight:700">' + msPct + '%</span><div class="ms-bar-bg"><div class="ms-bar" style="width:' + Math.min(msPct, 100) + '%"></div></div></div></td>';
         boHtml += '<td class="num">' + yoyStr + '</td>';
         boHtml += '<td class="num">¥' + r.avg_price.toLocaleString() + '</td></tr>';
       });
@@ -378,40 +380,44 @@
       allCharts.push(c2b);
     }
 
-    // MS table - always show all 11 branches, sorted by 市占率
+    // MS table - new ranking style, always show all 11 branches, sorted by 市占率
     var allMsData = (currentMode === 'weekly' ? DASHBOARD_ALL.data : DASHBOARD_ALL.monthly)[currentKey];
     var msDataForTable = (allMsData && allMsData.msData) ? allMsData.msData.slice().sort(function(a, b) { return b.cw_ms - a.cw_ms; }) : (d.msData ? d.msData.slice().sort(function(a, b) { return b.cw_ms - a.cw_ms; }) : null);
     if (msDataForTable) {
       var msHtml = '';
       msDataForTable.forEach(function(r, i) {
-        var rd = i === 0 ? 'rd-1' : i === 1 ? 'rd-2' : i === 2 ? 'rd-3' : 'rd-o';
-        var aTag = r.achieve >= 1.0 ? 'tag-green' : r.achieve >= 0.9 ? 'tag-yellow' : 'tag-red';
-        var lTag = r.lead_hx >= 0 ? 'tag-green' : 'tag-red';
-        var yTag = (r.yoy || 0) >= 0 ? 'tag-green' : 'tag-red';
-        var yoyStr = r.yoy !== undefined ? ('<span class="tag ' + yTag + '">' + (r.yoy >= 0 ? '+' : '') + (r.yoy*100).toFixed(1) + '%</span>') : '-';
+        var rankClass = i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'rank-normal';
+        var aTag = r.achieve >= 1.0 ? 'high' : r.achieve >= 0.9 ? 'mid' : 'low';
+        var lTag = r.lead_hx >= 0 ? 'positive' : 'negative';
+        var yTag = (r.yoy || 0) >= 0 ? 'trend-up' : 'trend-down';
+        var yoyArrow = (r.yoy || 0) >= 0 ? '▲' : '▼';
+        var yoyStr = r.yoy !== undefined ? ('<span class="' + yTag + '">' + yoyArrow + ' ' + (r.yoy >= 0 ? '+' : '') + (r.yoy*100).toFixed(1) + '%</span>') : '-';
         var isSelected = r.branch === currentBranch;
-        msHtml += '<tr' + (isSelected ? ' style="background:rgba(230,57,70,0.08);font-weight:700"' : '') + '>';
-        msHtml += '<td class="rank"><span class="rank-dot ' + rd + '">' + (i+1) + '</span></td>';
-        msHtml += '<td><strong>' + r.branch + '</strong></td>';
-        msHtml += '<td class="num">' + r.cw.toFixed(2) + '</td>';
-        msHtml += '<td class="num"><strong>' + (r.cw_ms*100).toFixed(1) + '%</strong></td>';
+        var msPct = (r.cw_ms*100).toFixed(1);
+        msHtml += '<tr class="' + (isSelected ? 'row-selected' : '') + '">';
+        msHtml += '<td><span class="rank-badge ' + rankClass + '">' + (i+1) + '</span></td>';
+        msHtml += '<td><span class="brand-name">' + r.branch + '</span></td>';
+        msHtml += '<td class="num metric-value">' + r.cw.toFixed(2) + '万</td>';
+        msHtml += '<td class="num"><div class="ms-bar-wrap"><span style="font-weight:700">' + msPct + '%</span><div class="ms-bar-bg"><div class="ms-bar" style="width:' + Math.min(msPct, 100) + '%"></div></div></div></td>';
         msHtml += '<td class="num">' + (r.target*100).toFixed(1) + '%</td>';
-        msHtml += '<td class="num"><span class="tag ' + aTag + '">' + (r.achieve*100).toFixed(1) + '%</span></td>';
+        msHtml += '<td class="num"><span class="achieve-ring"><span class="achieve-dot ' + aTag + '"></span>' + (r.achieve*100).toFixed(1) + '%</span></td>';
         msHtml += '<td class="num">' + yoyStr + '</td>';
-        msHtml += '<td class="num"><span class="tag ' + lTag + '">' + (r.lead_hx >= 0 ? '+' : '') + r.lead_hx.toFixed(1) + '万</span></td></tr>';
+        msHtml += '<td class="num"><span class="vs-badge ' + lTag + '">' + (r.lead_hx >= 0 ? '+' : '') + r.lead_hx.toFixed(1) + '万</span></td></tr>';
       });
       // Totals row
       if (allMsData && allMsData.totals && msDataForTable.length > 1) {
         var tc = allMsData.totals;
-        msHtml += '<tr style="font-weight:700;background:rgba(0,153,255,0.04)"><td colspan="2">合计</td>';
-        msHtml += '<td class="num">' + tc.cw.toFixed(2) + '</td>';
-        msHtml += '<td class="num">' + (tc.ms*100).toFixed(1) + '%</td>';
+        msHtml += '<tr style="font-weight:700;background:rgba(0,153,255,0.06)"><td><span class="rank-badge rank-normal" style="background:var(--blue)">计</span></td>';
+        msHtml += '<td><span class="brand-name">南部合计</span></td>';
+        msHtml += '<td class="num metric-value">' + tc.cw.toFixed(2) + '万</td>';
+        msHtml += '<td class="num"><div class="ms-bar-wrap"><span style="font-weight:700">' + (tc.ms*100).toFixed(1) + '%</span><div class="ms-bar-bg"><div class="ms-bar" style="width:' + Math.min(tc.ms*100, 100) + '%"></div></div></div></td>';
         msHtml += '<td class="num">-</td>';
         msHtml += '<td class="num">-</td>';
-        var tyTag = (tc.yoy || 0) >= 0 ? 'tag-green' : 'tag-red';
-        var tyStr = tc.yoy !== undefined ? ('<span class="tag ' + tyTag + '">' + (tc.yoy >= 0 ? '+' : '') + (tc.yoy*100).toFixed(1) + '%</span>') : '-';
+        var tyTag = (tc.yoy || 0) >= 0 ? 'trend-up' : 'trend-down';
+        var tyArrow = (tc.yoy || 0) >= 0 ? '▲' : '▼';
+        var tyStr = tc.yoy !== undefined ? ('<span class="' + tyTag + '">' + tyArrow + ' ' + (tc.yoy >= 0 ? '+' : '') + (tc.yoy*100).toFixed(1) + '%</span>') : '-';
         msHtml += '<td class="num">' + tyStr + '</td>';
-        msHtml += '<td class="num"><span class="tag tag-red">' + (tc.cw - tc.hx).toFixed(1) + '万</span></td></tr>';
+        msHtml += '<td class="num"><span class="vs-badge negative">' + (tc.cw - tc.hx).toFixed(1) + '万</span></td></tr>';
       }
       document.getElementById('ms-table-body').innerHTML = msHtml;
     }
@@ -868,10 +874,18 @@
         if (el) { hiddenEls.push(el); origStyles.push(el.style.display); el.style.display = 'none'; }
       }
       hide(navBar); hide(tocGrid); hide(branchSel); hide(weekSel); hide(monthSel); hide(modeToggle); hide(exportBtn);
-      // Hide footer text but keep structure
       if (footer) { hiddenEls.push(footer); origStyles.push(footer.style.display); footer.style.display = 'none'; }
 
-      // Add export watermark
+      // Expand all table-wrap containers so html2canvas captures full content
+      var tableWraps = document.querySelectorAll('.table-wrap');
+      var wrapOrigStyles = [];
+      tableWraps.forEach(function(tw) {
+        wrapOrigStyles.push({ el: tw, maxHeight: tw.style.maxHeight, overflow: tw.style.overflow, overflowY: tw.style.overflowY });
+        tw.style.maxHeight = 'none';
+        tw.style.overflow = 'visible';
+        tw.style.overflowY = 'visible';
+      });
+
       var body = document.body;
       var origBg = body.style.background;
       body.style.background = '#ffffff';
@@ -921,6 +935,8 @@
 
           // Step 4: Restore hidden elements
           hiddenEls.forEach(function(el, i) { el.style.display = origStyles[i]; });
+          // Restore table-wrap styles
+          wrapOrigStyles.forEach(function(s) { s.el.style.maxHeight = s.maxHeight; s.el.style.overflow = s.overflow; s.el.style.overflowY = s.overflowY; });
           body.style.background = origBg;
 
           // Step 5: Download
@@ -948,6 +964,7 @@
           });
           renderAll();
            hiddenEls.forEach(function(el, i) { el.style.display = origStyles[i]; });
+           wrapOrigStyles.forEach(function(s) { s.el.style.maxHeight = s.maxHeight; s.el.style.overflow = s.overflow; s.el.style.overflowY = s.overflowY; });
            body.style.background = origBg;
            exportBtn.textContent = '📷 导出长图';
            exportBtn.disabled = false;
