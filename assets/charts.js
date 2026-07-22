@@ -385,7 +385,7 @@
     var msDataForTable = (allMsData && allMsData.msData) ? allMsData.msData.slice().sort(function(a, b) { return b.cw_ms - a.cw_ms; }) : (d.msData ? d.msData.slice().sort(function(a, b) { return b.cw_ms - a.cw_ms; }) : null);
     // Helper: get 创维 rank within a branch
     function getCWRank(branch) {
-      var bw = DASHBOARD_ALL.branchData[currentKey];
+      var bw = (currentMode === 'weekly' ? DASHBOARD_ALL.branchData : DASHBOARD_ALL.branchMonthly)[currentKey];
       if (!bw || !bw[branch] || !bw[branch].brandOverview) return '--';
       var bo = bw[branch].brandOverview;
       for (var j = 0; j < bo.length; j++) {
@@ -885,6 +885,7 @@
       var monthSel = document.getElementById('month-selector');
       var modeToggle = document.getElementById('mode-toggle');
       var footer = document.querySelector('footer');
+      var header = document.querySelector('.header');
       var hiddenEls = [];
       var origStyles = [];
       function hide(el) {
@@ -892,6 +893,14 @@
       }
       hide(navBar); hide(tocGrid); hide(branchSel); hide(weekSel); hide(monthSel); hide(modeToggle); hide(exportBtn);
       if (footer) { hiddenEls.push(footer); origStyles.push(footer.style.display); footer.style.display = 'none'; }
+
+      // Compact header for export
+      var headerOrig = {};
+      if (header) {
+        headerOrig = { padding: header.style.padding, marginBottom: header.style.marginBottom };
+        header.style.padding = '12px 0';
+        header.style.marginBottom = '0';
+      }
 
       // Expand all table-wrap containers so html2canvas captures full content
       var tableWraps = document.querySelectorAll('.table-wrap');
@@ -934,7 +943,8 @@
           backgroundColor: '#ffffff',
           logging: false,
           windowWidth: document.body.scrollWidth,
-          windowHeight: document.body.scrollHeight
+          windowHeight: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight),
+          height: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
         }).then(function(canvas) {
           // Step 3: Restore original charts
           chartParents.forEach(function(p) {
@@ -954,6 +964,8 @@
           hiddenEls.forEach(function(el, i) { el.style.display = origStyles[i]; });
           // Restore table-wrap styles
           wrapOrigStyles.forEach(function(s) { s.el.style.maxHeight = s.maxHeight; s.el.style.overflow = s.overflow; s.el.style.overflowY = s.overflowY; });
+          // Restore header
+          if (header) { header.style.padding = headerOrig.padding; header.style.marginBottom = headerOrig.marginBottom; }
           body.style.background = origBg;
 
           // Step 5: Download
@@ -982,6 +994,7 @@
           renderAll();
            hiddenEls.forEach(function(el, i) { el.style.display = origStyles[i]; });
            wrapOrigStyles.forEach(function(s) { s.el.style.maxHeight = s.maxHeight; s.el.style.overflow = s.overflow; s.el.style.overflowY = s.overflowY; });
+           if (header) { header.style.padding = headerOrig.padding; header.style.marginBottom = headerOrig.marginBottom; }
            body.style.background = origBg;
            exportBtn.textContent = '📷 导出长图';
            exportBtn.disabled = false;
