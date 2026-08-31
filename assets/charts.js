@@ -937,9 +937,12 @@
 
       // Step 2: Capture full body
       setTimeout(function() {
+        // 浏览器 canvas 单边上限约 16384px: 页面过高时按比例压缩 scale, 否则底部会被截断为空白
+        var pageH = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+        var dynScale = Math.min(2, Math.max(0.5, 16000 / pageH));
         html2canvas(document.body, {
           useCORS: true,
-          scale: 2,
+          scale: dynScale,
           backgroundColor: '#ffffff',
           logging: false,
           windowWidth: document.body.scrollWidth,
@@ -1003,6 +1006,89 @@
            alert('导出失败，请重试。');
         });
       }, 500);
+    });
+  }
+
+  // ---- 模块级导出: 只截取指定 section ----
+  function exportSection(sec, label, btn) {
+    if (!sec || !btn) return;
+    var prevText = btn.textContent;
+    btn.textContent = '⏳ 生成中...';
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+
+    // 展开模块内表格容器, 保证完整截取
+    var wraps = sec.querySelectorAll('.table-wrap');
+    var wrapStyles = [];
+    wraps.forEach(function(tw) {
+      wrapStyles.push({ el: tw, maxHeight: tw.style.maxHeight, overflow: tw.style.overflow, overflowY: tw.style.overflowY });
+      tw.style.maxHeight = 'none';
+      tw.style.overflow = 'visible';
+      tw.style.overflowY = 'visible';
+    });
+
+    // 模块内图表转图片 (html2canvas 对 svg 渲染不稳定)
+    var replaced = [];
+    allCharts.forEach(function(chartel) {
+      var dom = chartel.getDom();
+      if (dom && sec.contains(dom) && dom.parentNode) {
+        var parent = dom.parentNode;
+        var dataUrl = chartel.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#fff' });
+        var img = document.createElement('img');
+        img.src = dataUrl;
+        img.style.width = dom.style.width || dom.offsetWidth + 'px';
+        img.style.height = dom.style.height || dom.offsetHeight + 'px';
+        img.style.display = 'block';
+        parent.replaceChild(img, dom);
+        replaced.push({ parent: parent, original: dom, img: img });
+      }
+    });
+
+    var origBtnDisplay = btn.style.display;
+    btn.style.display = 'none';
+
+    function restore(skipRerender) {
+      replaced.forEach(function(p) {
+        if (p.img.parentNode === p.parent) p.parent.replaceChild(p.original, p.img);
+      });
+      wrapStyles.forEach(function(s) { s.el.style.maxHeight = s.maxHeight; s.el.style.overflow = s.overflow; s.el.style.overflowY = s.overflowY; });
+      btn.style.display = origBtnDisplay;
+      if (!skipRerender) renderAll();
+    }
+
+    setTimeout(function() {
+      // 浏览器 canvas 单边上限约 16384px, 超高时压缩 scale
+      var scale = Math.min(2, Math.max(0.5, 16000 / sec.scrollHeight));
+      html2canvas(sec, { useCORS: true, scale: scale, backgroundColor: '#ffffff', logging: false })
+        .then(function(canvas) {
+          restore(true);
+          var link = document.createElement('a');
+          var now = new Date();
+          var ts = now.getFullYear() + '-' + (now.getMonth()+1).toString().padStart(2,'0') + '-' + now.getDate().toString().padStart(2,'0');
+          var branchLabel = currentBranch === '南部全部' ? '南部战区' : currentBranch;
+          link.download = branchLabel + '_' + label + '_' + currentKey + '_' + ts + '.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          btn.textContent = prevText;
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          renderAll();
+        })
+        .catch(function(err) {
+          restore();
+          btn.textContent = prevText;
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          console.error('Section export failed:', err);
+          alert('导出失败，请重试。');
+        });
+    }, 400);
+  }
+
+  var exportTop20Btn = document.getElementById('export-top20');
+  if (exportTop20Btn) {
+    exportTop20Btn.addEventListener('click', function() {
+      exportSection(document.getElementById('top20'), 'TOP20', exportTop20Btn);
     });
   }
 

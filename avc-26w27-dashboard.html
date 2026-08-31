@@ -98,6 +98,8 @@ body {
 }
 .section-header h2 { font-size: 1.1rem; font-weight: 700; }
 .section-header .badge { font-size: 0.72rem; background: var(--accent); color: #fff; padding: 4px 12px; border-radius: 12px; font-weight: 600; }
+.sec-export-btn { padding: 4px 12px; font-size: 0.72rem; font-weight: 600; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer; white-space: nowrap; }
+.sec-export-btn:disabled { opacity: 0.6; cursor: default; }
 
 /* Tables */
 .table-wrap { overflow-x: auto; overflow-y: auto; max-height: 600px; }
@@ -535,8 +537,11 @@ footer {
 <!-- Section 3: TOP20型号分析 -->
 <div class="section" id="top20">
   <div class="section-header">
-    <h2>TOP20 型号 &amp; 品牌分析</h2>
-    <span class="badge">全品牌销额排名</span>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h2>TOP20 型号 &amp; 品牌分析</h2>
+      <span class="badge">全品牌销额排名</span>
+    </div>
+    <button id="export-top20" class="sec-export-btn">📷 导出本模块</button>
   </div>
 
   <div class="two-col-4-6">
@@ -688,7 +693,7 @@ footer {
 
 <script src="assets/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="assets/all_data.js"></script>
+<script src="assets/all_data.js?v=35"></script>
 <script>
 // Scroll spy for nav
 (function() {
@@ -712,6 +717,6 @@ footer {
   });
 })();
 </script>
-<script src="assets/charts.js"></script>
+<script src="assets/charts.js?v=35"></script>
 </body>
 </html>
