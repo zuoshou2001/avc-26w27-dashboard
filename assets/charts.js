@@ -13,7 +13,7 @@
 
   var allCharts = [];
   var currentMode = 'weekly';
-  var currentKey = '26W34';
+  var currentKey = '26W37';
   var currentBranch = '南部全部';
 
   // Week date ranges (approximate: each week = 7 days from 26W01 start 2025-12-29)
@@ -31,7 +31,7 @@
   var MONTH_DATES = {
     '1月': '01.01 - 01.31', '2月': '02.01 - 02.28', '3月': '03.01 - 03.31',
     '4月': '04.01 - 04.30', '5月': '05.01 - 05.31', '6月': '06.01 - 06.28',
-    '7月': '06.29 - 08.02', '8月': '08.03 - 08.23'
+    '7月': '06.29 - 08.02', '8月': '08.03 - 08.30', '9月': '08.31 - 09.13'
   };
 
   function getData() {
