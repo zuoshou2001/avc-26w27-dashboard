@@ -352,15 +352,14 @@
     // 表格
     var html = '';
     d.data98.forEach(function(r) {
-      // 🔧 控比 = 创维 / (创维 + 海信) × 100%（创维控比海信口径）
-      var cw = r.cw_s || 0;
-      var hx = r.hx_s || 0;
-      var totalBH = cw + hx;
-      var ratioPct = totalBH > 0 ? (cw / totalBH * 100).toFixed(1) : '—';
+      // 🔧 创维控比海信 = 创维销额 / 海信销额（销额倍数口径）
+      var ratio = (r.hx_e || 0) > 0 ? (r.cw_e / r.hx_e) : null;
+      var ratioStr = ratio !== null ? ratio.toFixed(2) + 'x' : '—';
+      var color = ratio !== null ? (ratio >= 1 ? 'var(--accent)' : 'var(--muted)') : 'var(--muted)';
       html += '<tr><td><strong>' + r.branch + '</strong></td>';
-      html += '<td class="num">' + cw + '</td><td class="num">' + r.cw_e.toFixed(2) + '</td>';
-      html += '<td class="num">' + hx + '</td><td class="num">' + (r.tcl_s || 0) + '</td>';
-      html += '<td class="num" style="color:' + (totalBH > 0 && cw / totalBH >= 0.5 ? 'var(--accent)' : 'var(--muted)') + '"><strong>' + ratioPct + '%</strong></td></tr>';
+      html += '<td class="num">' + r.cw_s + '</td><td class="num">' + r.cw_e.toFixed(2) + '</td>';
+      html += '<td class="num">' + r.hx_s + '</td><td class="num">' + (r.tcl_s || 0) + '</td>';
+      html += '<td class="num" style="color:' + color + '"><strong>' + ratioStr + '</strong></td></tr>';
     });
     document.getElementById('table-98-body').innerHTML = html;
   }
@@ -386,14 +385,14 @@
       // 表格
       var html = '';
       qData.forEach(function(r) {
-        // 🔧 控比 = Q7H / (Q7H + U7S-PRO) × 100%
-        var total = r.q7h_s + r.u7s_s;
-        var ratioPct = total > 0 ? (r.q7h_s / total * 100).toFixed(1) : '—';
-        var ratioColor = total > 0 && r.q7h_s / total >= 0.5 ? 'var(--accent)' : 'var(--accent)';
+        // 🔧 创维控比海信 = Q7H销额 / U7S-PRO销额（销额倍数口径）
+        var ratio = (r.u7s_e || 0) > 0 ? (r.q7h_e / r.u7s_e) : null;
+        var ratioStr = ratio !== null ? ratio.toFixed(2) + 'x' : '—';
+        var ratioColor = ratio !== null ? (ratio >= 1 ? 'var(--accent)' : 'var(--muted)') : 'var(--muted)';
         html += '<tr><td><strong>' + r.branch + '</strong></td>';
         html += '<td class="num" style="color:var(--accent)">' + r.q7h_s + '</td><td class="num">' + r.q7h_e.toFixed(2) + '</td>';
         html += '<td class="num" style="color:var(--blue)">' + r.u7s_s + '</td><td class="num">' + r.u7s_e.toFixed(2) + '</td>';
-        html += '<td class="num"><strong style="color:' + ratioColor + '">' + ratioPct + '%</strong></td></tr>';
+        html += '<td class="num"><strong style="color:' + ratioColor + '">' + ratioStr + '</strong></td></tr>';
       });
       document.getElementById('q7h-branch-body').innerHTML = html;
     }
@@ -669,35 +668,36 @@
     var totalHx = data.reduce(function(s, r) { return s + r.hx_s; }, 0);
     var totalTcl = data.reduce(function(s, r) { return s + r.tcl_s; }, 0);
     var totalHy = data.reduce(function(s, r) { return s + (r.hy_s || 0); }, 0);
-    // 🔧 创维控比海信 = 创维 / (创维 + 海信)
-    var totalBH = totalCw + totalHx;
-    var ratioPct = totalBH > 0 ? (totalCw / totalBH * 100).toFixed(1) : '—';
-    var dominate = data.filter(function(r) { return r.cw_s > r.hx_s && r.cw_s > r.tcl_s; });
-    var loseHx = data.filter(function(r) { return r.hx_s > r.cw_s; });
-    var big = data.slice().sort(function(a, b) { return (a.hy_s||0) - (b.hy_s||0); })[data.length - 1];
+    var totalCwE = data.reduce(function(s, r) { return s + (r.cw_e || 0); }, 0);
+    var totalHxE = data.reduce(function(s, r) { return s + (r.hx_e || 0); }, 0);
+    // 🔧 创维控比海信 = 创维销额 / 海信销额（销额倍数口径）
+    var ratio = totalHxE > 0 ? (totalCwE / totalHxE) : null;
+    var ratioStr = ratio !== null ? ratio.toFixed(2) + 'x' : '—';
+    var dominate = data.filter(function(r) { return (r.cw_e||0) > (r.hx_e||0) && (r.cw_e||0) > (r.tcl_e||0); });
+    var loseHx = data.filter(function(r) { return (r.hx_e||0) > (r.cw_e||0); });
+    var big = data.slice().sort(function(a, b) { return ((a.hy_s||0)) - ((b.hy_s||0)); })[data.length - 1];
 
     var stance = [], problem = [], result = [];
 
-    stance.push('98吋+ 行业合计 <span class="hi">'+ totalHy +'台</span>，创维 <span class="hi">'+ totalCw +'</span> vs 海信 <span class="hi-blue">'+ totalHx +'</span> vs TCL <span class="hi-orange">'+ totalTcl +'</span>');
-    stance.push('创维控比海信 <span class="hi">'+ ratioPct +'%</span>（创维/(创维+海信)）');
+    stance.push('98吋+ 行业合计 <span class="hi">'+ totalHy +'台</span>，创维 <span class="hi">'+ totalCw +'</span>台 / <span class="hi">'+ totalCwE.toFixed(0) +'</span>万 vs 海信 <span class="hi-blue">'+ totalHx +'</span>台 / <span class="hi-blue">'+ totalHxE.toFixed(0) +'</span>万');
+    stance.push('创维控比海信 <span class="hi">'+ ratioStr +'</span>（销额倍数）');
     stance.push('最大单市场 <span class="hi-blue">'+ big.branch +'</span>（行业 ' + (big.hy_s||0) + ' 台）');
 
-    // 🔧 控比不足 50% 且海信领先 → 失守
-    if (totalBH > 0 && totalCw / totalBH < 0.5 && totalHx > totalCw) {
-      problem.push('98吋+ 创维 <span class="hi">'+ totalCw +'</span> 台 < 海信 <span class="hi-blue">'+ totalHx +'</span> 台，控比海信仅 <span class="hi">'+ ratioPct +'%</span>，大屏失守');
+    // 🔧 控比海信 < 1x 且海信销额领先 → 失守
+    if (ratio !== null && ratio < 1 && totalHxE > totalCwE) {
+      problem.push('98吋+ 创维销额 <span class="hi">'+ totalCwE.toFixed(0) +'万</span> < 海信 <span class="hi-blue">'+ totalHxE.toFixed(0) +'万</span>，控比海信仅 <span class="hi">'+ ratioStr +'</span>，大屏失守');
     }
     if (loseHx.length >= 3) {
-      problem.push('海信在 <span class="hi">'+ loseHx.length +'家</span> 分公司领先：' + loseHx.map(function(r){return r.branch}).join('、'));
+      problem.push('海信销额在 <span class="hi">'+ loseHx.length +'家</span> 分公司领先：' + loseHx.map(function(r){return r.branch}).join('、'));
     }
-    if (big.cw_s < big.hx_s) {
-      problem.push('最大市场 <span class="hi-blue">'+ big.branch +'</span> 海信 <span class="hi">'+ big.hx_s +'</span> 台 > 创维 <span class="hi">'+ big.cw_s +'</span> 台，关键阵地失守');
+    if ((big.cw_e||0) < (big.hx_e||0)) {
+      problem.push('最大市场 <span class="hi-blue">'+ big.branch +'</span> 海信 <span class="hi">'+ (big.hx_e||0).toFixed(1) +'万</span> > 创维 <span class="hi">'+ (big.cw_e||0).toFixed(1) +'万</span>，关键阵地失守');
     }
 
     if (dominate.length > 0) {
-      result.push('创维控场 <span class="hi-green">'+ dominate.length +'家</span>：' + dominate.map(function(r){return r.branch}).join('、'));
+      result.push('创维销额压制 <span class="hi-green">'+ dominate.length +'家</span> 分公司：' + dominate.map(function(r){return r.branch}).join('、'));
     }
-    // 控比海信 >= 55% 算优势
-    if (parseFloat(ratioPct) >= 55) result.push('创维控比海信 <span class="hi-green">'+ ratioPct +'%</span>，大屏阵地稳固');
+    if (ratio !== null && ratio >= 1.2) result.push('创维控比海信 <span class="hi-green">'+ ratioStr +'</span>，大屏阵地稳固');
 
     fillBlock('ins-98', { stance: stance, problem: problem, result: result });
   }
@@ -708,12 +708,14 @@
     var q = d.q7hData.slice();
     var qTotal = q.reduce(function(s, r) { return s + r.q7h_s; }, 0);
     var uTotal = q.reduce(function(s, r) { return s + r.u7s_s; }, 0);
-    var totalBH = qTotal + uTotal;
-    // 🔧 创维控比海信 = Q7H / (Q7H + U7S-PRO)
-    var ratioPct = totalBH > 0 ? (qTotal / totalBH * 100).toFixed(1) : '—';
-    var qLead = q.filter(function(r) { return r.q7h_s > r.u7s_s; });
-    var uLead = q.filter(function(r) { return r.u7s_s > r.q7h_s; });
-    var qBest = q.slice().sort(function(a, b) { return b.q7h_s - a.q7h_s; })[0];
+    var qTotalE = q.reduce(function(s, r) { return s + (r.q7h_e || 0); }, 0);
+    var uTotalE = q.reduce(function(s, r) { return s + (r.u7s_e || 0); }, 0);
+    // 🔧 创维控比海信 = Q7H销额 / U7S-PRO销额（销额倍数口径）
+    var ratio = uTotalE > 0 ? (qTotalE / uTotalE) : null;
+    var ratioStr = ratio !== null ? ratio.toFixed(2) + 'x' : '—';
+    var qLead = q.filter(function(r) { return (r.q7h_e||0) > (r.u7s_e||0); });
+    var uLead = q.filter(function(r) { return (r.u7s_e||0) > (r.q7h_e||0); });
+    var qBest = q.slice().sort(function(a, b) { return (b.q7h_e||0) - (a.q7h_e||0); })[0];
     var topSize = null, topSizeAmt = 0;
     (d.q7hBySize || []).forEach(function(item) {
       if (item.amount > topSizeAmt) { topSizeAmt = item.amount; topSize = item.size; }
@@ -721,22 +723,23 @@
 
     var stance = [], problem = [], result = [];
 
-    stance.push('Q7H(创维) 合计 <span class="hi">'+ qTotal +'台</span> vs U7S-PRO(海信) <span class="hi-blue">'+ uTotal +'台</span>，创维控比海信 <span class="hi">'+ ratioPct +'%</span>');
-    stance.push('最大战场 <span class="hi">'+ qBest.branch +'</span>（Q7H '+ qBest.q7h_s +' vs U7S-PRO '+ qBest.u7s_s +'）');
+    stance.push('Q7H(创维) 合计 <span class="hi">'+ qTotal +'台/'+ qTotalE.toFixed(0) +'万</span> vs U7S-PRO(海信) <span class="hi-blue">'+ uTotal +'台/'+ uTotalE.toFixed(0) +'万</span>');
+    stance.push('创维控比海信 <span class="hi">'+ ratioStr +'</span>（销额倍数）');
+    stance.push('最大战场 <span class="hi">'+ qBest.branch +'</span>（Q7H销额 '+ (qBest.q7h_e||0).toFixed(1) +'万 vs U7S-PRO '+ (qBest.u7s_e||0).toFixed(1) +'万）');
     if (topSize) stance.push('Q7H 主力尺寸 <span class="hi">'+ topSize +'吋</span>，销额 <span class="hi">'+ topSizeAmt.toFixed(1) +'万</span>');
 
     if (uLead.length > 0) {
-      problem.push('U7S-PRO 在 <span class="hi">'+ uLead.length +'家</span> 反超：' + uLead.map(function(r){return r.branch+'('+r.u7s_s+'台)'}).join('、'));
+      problem.push('U7S-PRO 在 <span class="hi">'+ uLead.length +'家</span> 销额反超：' + uLead.map(function(r){return r.branch+'('+(r.u7s_e||0).toFixed(1)+'万)'}).join('、'));
     }
-    var uBig = uLead.slice().sort(function(a, b) { return b.u7s_s - a.u7s_s; })[0];
-    if (uBig && uBig.u7s_s >= 5) {
-      problem.push(uBig.branch + ' U7S-PRO <span class="hi">'+ uBig.u7s_s +'台</span>，创维 Q7H <span class="hi">仅 '+ uBig.q7h_s +'台</span>');
+    var uBig = uLead.slice().sort(function(a, b) { return (b.u7s_e||0) - (a.u7s_e||0); })[0];
+    if (uBig && (uBig.u7s_e||0) >= 5) {
+      problem.push(uBig.branch + ' U7S-PRO <span class="hi">'+ (uBig.u7s_e||0).toFixed(1) +'万</span>，创维 Q7H <span class="hi">仅 '+ (uBig.q7h_e||0).toFixed(1) +'万</span>');
     }
 
     if (qLead.length > 0) {
-      result.push('Q7H 压制 <span class="hi-green">'+ qLead.length +'家</span> 分公司');
+      result.push('Q7H 销额压制 <span class="hi-green">'+ qLead.length +'家</span> 分公司');
     }
-    if (totalBH > 0 && qTotal / totalBH >= 0.6) result.push('创维控比海信 <span class="hi-green">'+ ratioPct +'%</span>，产品力领先');
+    if (ratio !== null && ratio >= 1.5) result.push('创维控比海信 <span class="hi-green">'+ ratioStr +'</span>，Q7H 产品力领先');
 
     fillBlock('ins-q7h', { stance: stance, problem: problem, result: result });
   }
@@ -1112,16 +1115,14 @@
 
     // ✅ 【板块3：Q7H 产品力】
     if (allData.q7hData) {
-      var q7hTotal = allData.q7hData.reduce(function(s, r) { return s + r.q7h_s; }, 0);
-      var u7sTotal = allData.q7hData.reduce(function(s, r) { return s + r.u7s_s; }, 0);
-      var totalBoth = q7hTotal + u7sTotal;
-      if (totalBoth > 0 && q7hTotal / totalBoth >= 0.6) {
-        achieves.push('创维控比海信 <span class="hi-green">' + (q7hTotal/totalBoth*100).toFixed(1) + '%</span>，Q7H 产品力领先');
-      } else if (totalBoth > 0 && u7sTotal > q7hTotal) {
-        issues.push('创维控比海信仅 <span class="hi">' + (q7hTotal/totalBoth*100).toFixed(1) + '%</span>，U7S-PRO 反超');
+      var q7hTotalE = allData.q7hData.reduce(function(s, r) { return s + (r.q7h_e || 0); }, 0);
+      var u7sTotalE = allData.q7hData.reduce(function(s, r) { return s + (r.u7s_e || 0); }, 0);
+      var ratioQ7H = u7sTotalE > 0 ? (q7hTotalE / u7sTotalE) : null;
+      if (ratioQ7H !== null && ratioQ7H >= 1.5) {
+        achieves.push('创维控比海信 <span class="hi-green">' + ratioQ7H.toFixed(2) + 'x</span>，Q7H 产品力领先');
+      } else if (ratioQ7H !== null && ratioQ7H < 1) {
+        issues.push('创维控比海信仅 <span class="hi">' + ratioQ7H.toFixed(2) + 'x</span>，U7S-PRO 销额反超');
       }
-      var u7Lead = allData.q7hData.filter(function(r) { return r.u7s_s > r.q7h_s && r.u7s_s >= 3; });
-      if (u7Lead.length > 0) issues.push('U7S-PRO 销量 ' + (isBranch ? '反超' : '领先') + ' Q7H');
     }
 
     // ✅ 【板块4：价格段 & 主战场】
@@ -1134,27 +1135,13 @@
       if (worstBand) issues.push('<span class="hi">' + worstBand.band + '</span> 行业占比 ' + worstBand.hy_share.toFixed(1) + '%，创维控比仅 <span class="hi">' + worstBand.cw_share.toFixed(1) + '%</span>，薄弱环节');
     }
 
-    // ✅ 【板块5：98吋+ 大屏】—— 分公司 vs 战区对比
+    // ✅ 【板块5：98吋+ 大屏】
     if (allData.data98) {
-      var totalCw98 = allData.data98.reduce(function(s, r){return s + r.cw_s}, 0);
-      var totalHx98 = allData.data98.reduce(function(s, r){return s + r.hx_s}, 0);
-      // 🔧 创维控比海信口径
-      var totalBH98 = totalCw98 + totalHx98;
-      var ratio98 = totalBH98 > 0 ? (totalCw98/totalBH98*100).toFixed(1) : '—';
-      if (isBranch && totalBH98 > 0) {
-        // 分公司自己 98吋+ vs 战区平均
-        var theater = getAllData();
-        if (theater && theater.data98) {
-          var theaterCw98 = theater.data98.reduce(function(s, r){return s + r.cw_s}, 0);
-          var theaterHx98 = theater.data98.reduce(function(s, r){return s + r.hx_s}, 0);
-          if (totalCw98 > totalHx98) achieves.push('98吋+ 创维 <span class="hi-green">' + totalCw98 + '台</span> > 海信 ' + totalHx98 + '台');
-          else issues.push('98吋+ 创维 ' + totalCw98 + '台 < 海信 <span class="hi">' + totalHx98 + '台</span>');
-        }
-      } else {
-        // 战区整体判断：创维控比海信 >= 55% 算优势，< 50% 且海信领先算失守
-        if (totalBH98 > 0 && totalCw98 / totalBH98 >= 0.55) achieves.push('98吋+ 创维控比海信 <span class="hi-green">' + ratio98 + '%</span>，大屏阵地稳固');
-        if (totalBH98 > 0 && totalCw98 / totalBH98 < 0.5 && totalHx98 > totalCw98) issues.push('98吋+ 创维 <span class="hi">' + totalCw98 + '台</span> < 海信 ' + totalHx98 + '台，控比海信仅 ' + ratio98 + '%，大屏失守');
-      }
+      var totalCw98E = allData.data98.reduce(function(s, r){return s + (r.cw_e||0)}, 0);
+      var totalHx98E = allData.data98.reduce(function(s, r){return s + (r.hx_e||0)}, 0);
+      var ratio98 = totalHx98E > 0 ? (totalCw98E / totalHx98E) : null;
+      if (ratio98 !== null && ratio98 >= 1.2) achieves.push('98吋+ 创维控比海信 <span class="hi-green">' + ratio98.toFixed(2) + 'x</span>，大屏阵地稳固');
+      if (ratio98 !== null && ratio98 < 1 && totalHx98E > totalCw98E) issues.push('98吋+ 创维控比海信仅 <span class="hi">' + ratio98.toFixed(2) + 'x</span>，大屏失守');
     }
 
     // ✅ 【板块6：TOP40 型号】
