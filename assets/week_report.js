@@ -260,11 +260,13 @@
   /* ========== 模块6: 尺寸段 ========== */
   function renderSizeSegs(d) {
     if (!d) return;
+    // 🔧 行业饼图也排除"其他"，和创维饼图 segment 对齐
+    var hyPieData = (d.sizeList||[]).filter(function(r){return r.size!=='其他'});
     // 行业饼图
     mkChart(document.getElementById('chart-size-pie-hy'), {
       animation: false, tooltip: { trigger: 'item', appendToBody: true, formatter: '{b}: {c}万 ({d}%)' },
       legend: { bottom: 0, textStyle: { color: ink, fontSize: 10 } },
-      series: [{ type: 'pie', radius: ['40%', '70%'], data: (d.sizeList||[]).map(function(r) { return { name: r.size, value: r.amount }; }),
+      series: [{ type: 'pie', radius: ['40%', '70%'], data: hyPieData.map(function(r) { return { name: r.size, value: r.amount }; }),
         label: { color: ink, fontSize: 10, formatter: '{b}\n{d}%' }, itemStyle: { borderColor: bg2, borderWidth: 2 } }]
     });
     // 创维饼图
@@ -295,9 +297,9 @@
       });
     }
 
-    // 表格
+    // 表格（也过滤掉"其他"）
     var html = '';
-    (d.sizeList||[]).forEach(function(r) {
+    (d.sizeList||[]).filter(function(r){return r.size!=='其他'}).forEach(function(r) {
       var cw = (d.cwSizeList||[]).filter(function(c) { return c.size === r.size; })[0];
       var cwSales = cw ? cw.sales : 0;
       var cwAmt = cw ? cw.amount : 0;
@@ -920,9 +922,12 @@
     var rowsHtml = rows.map(function(r, idx) {
       var it = r.item;
       var bc = brandClass(it.brand);
-      var ageHtml = r.age === null ? '<span class="hi-muted">—</span>' :
-        (r.age === 0 ? '<span class="age-new">NEW</span>' :
-         (r.age <= 4 ? '<span class="age-new">' + r.age + '周</span>' : r.age + '周'));
+      // 🔧 同时显示周龄 + 首次出现的周号
+      var firstWeek = firstSeenMap[it.brand + '|' + it.model];
+      var firstLabel = firstWeek ? '<span style="font-size:0.68rem;color:var(--muted);display:block">' + firstWeek + '</span>' : '';
+      var ageHtml = r.age === null ? '<span class="hi-muted">—</span>' + firstLabel :
+        (r.age === 0 ? '<span class="age-new">NEW</span>' + firstLabel :
+         (r.age <= 4 ? '<span class="age-new">' + r.age + '周</span>' + firstLabel : r.age + '周' + firstLabel));
       var wowHtml = it.wow_sales !== null && it.wow_sales !== undefined && it.wow_sales > 0
         ? ' <span class="hi-green">▲+' + (it.wow_sales*100).toFixed(0) + '%</span>'
         : (it.wow_sales !== null && it.wow_sales !== undefined && it.wow_sales < 0
