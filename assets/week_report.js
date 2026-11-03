@@ -794,23 +794,27 @@
     fillBlock('exec', { stance: stance, problem: problems, result: suggestions });
   }
 
-  /* ========== 工具：firstSeenMap 构建 ========== */
+  /* ========== 工具：getFirstSeenMap — 直接用 Python 预计算的全量数据 ========== */
   var _firstSeenMap = null;
   var _weeksOrder = null;
   function getFirstSeenMap() {
     if (_firstSeenMap) return _firstSeenMap;
-    _firstSeenMap = {};
-    if (!window.DASHBOARD_ALL || !DASHBOARD_ALL.allWeeks) return _firstSeenMap;
-    _weeksOrder = DASHBOARD_ALL.allWeeks.slice();
-    var allData = DASHBOARD_ALL.data || {};
-    _weeksOrder.forEach(function(w) {
-      var t40 = allData[w] && allData[w].top40;
-      if (!t40) return;
-      t40.forEach(function(item) {
-        var key = item.brand + '|' + item.model;
-        if (!_firstSeenMap[key]) _firstSeenMap[key] = w;
+    // 🔧 优先用 Python 预扫描的全量数据（覆盖 25+26 两年所有型号）
+    if (window.DASHBOARD_ALL && DASHBOARD_ALL.modelFirstSeen) {
+      _firstSeenMap = DASHBOARD_ALL.modelFirstSeen;
+    } else {
+      // 兜底：JS 自己扫 top40 历史（精度差，只能扫 26 年进 top40 的型号）
+      _firstSeenMap = {};
+      if (!window.DASHBOARD_ALL || !DASHBOARD_ALL.allWeeks) return _firstSeenMap;
+      DASHBOARD_ALL.allWeeks.forEach(function(w) {
+        var t40 = DASHBOARD_ALL.data[w] && DASHBOARD_ALL.data[w].top40;
+        if (!t40) return;
+        t40.forEach(function(item) {
+          var key = item.brand + '|' + item.model;
+          if (!_firstSeenMap[key]) _firstSeenMap[key] = w;
+        });
       });
-    });
+    }
     return _firstSeenMap;
   }
   function getModelAge(brand, model, curWeek) {
