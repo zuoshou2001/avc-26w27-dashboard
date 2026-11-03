@@ -1300,10 +1300,20 @@
 
   // 初始渲染
   if (window.DASHBOARD_ALL) {
+    // 动态重建周次 option 列表（从最新到最旧）
+    if (ws && DASHBOARD_ALL.allWeeks) {
+      ws.innerHTML = '';
+      var weeksSorted = DASHBOARD_ALL.allWeeks.slice().reverse();
+      weeksSorted.forEach(function(w) {
+        var opt = document.createElement('option');
+        opt.value = w; opt.textContent = w;
+        if (w === DASHBOARD_ALL.currentWeek) opt.selected = true;
+        ws.appendChild(opt);
+      });
+    }
     // 自动更新到最新周
     if (DASHBOARD_ALL.currentWeek) {
       currentKey = DASHBOARD_ALL.currentWeek;
-      if (ws) ws.value = currentKey;
     }
     renderAll();
   } else {
