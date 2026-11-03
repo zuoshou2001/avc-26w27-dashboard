@@ -351,11 +351,13 @@
     // 表格
     var html = '';
     d.data98.forEach(function(r) {
-      var ratioHx = r.hx_s > 0 ? (r.cw_s / r.hx_s).toFixed(1) : '-';
+      // 🔧 控比 = 创维 / (创维 + 海信 + TCL) × 100%
+      var total = r.cw_s + r.hx_s + r.tcl_s;
+      var ratioPct = total > 0 ? (r.cw_s / total * 100).toFixed(1) : '—';
       html += '<tr><td><strong>' + r.branch + '</strong></td>';
       html += '<td class="num">' + r.cw_s + '</td><td class="num">' + r.cw_e.toFixed(2) + '</td>';
       html += '<td class="num">' + r.hx_s + '</td><td class="num">' + r.tcl_s + '</td>';
-      html += '<td class="num" style="color:' + (ratioHx !== '-' && +ratioHx >= 1 ? 'var(--green)' : 'var(--accent)') + '">' + ratioHx + 'x</td></tr>';
+      html += '<td class="num" style="color:' + (total > 0 && r.cw_s / total >= 0.4 ? 'var(--accent)' : 'var(--muted)') + '"><strong>' + ratioPct + '%</strong></td></tr>';
     });
     document.getElementById('table-98-body').innerHTML = html;
   }
@@ -381,11 +383,14 @@
       // 表格
       var html = '';
       qData.forEach(function(r) {
-        var ratio = r.u7s_s > 0 ? (r.q7h_s / r.u7s_s).toFixed(1) : '∞';
+        // 🔧 控比 = Q7H / (Q7H + U7S-PRO) × 100%
+        var total = r.q7h_s + r.u7s_s;
+        var ratioPct = total > 0 ? (r.q7h_s / total * 100).toFixed(1) : '—';
+        var ratioColor = total > 0 && r.q7h_s / total >= 0.5 ? 'var(--accent)' : 'var(--accent)';
         html += '<tr><td><strong>' + r.branch + '</strong></td>';
         html += '<td class="num" style="color:var(--accent)">' + r.q7h_s + '</td><td class="num">' + r.q7h_e.toFixed(2) + '</td>';
         html += '<td class="num" style="color:var(--blue)">' + r.u7s_s + '</td><td class="num">' + r.u7s_e.toFixed(2) + '</td>';
-        html += '<td class="num"><strong>' + ratio + 'x</strong></td></tr>';
+        html += '<td class="num"><strong style="color:' + ratioColor + '">' + ratioPct + '%</strong></td></tr>';
       });
       document.getElementById('q7h-branch-body').innerHTML = html;
     }
@@ -664,17 +669,18 @@
     var dominate = data.filter(function(r) { return r.cw_s > r.hx_s && r.cw_s > r.tcl_s; });
     var loseHx = data.filter(function(r) { return r.hx_s > r.cw_s; });
     var big = data.slice().sort(function(a, b) { return (a.cw_s + a.hx_s + a.tcl_s) - (b.cw_s + b.hx_s + b.tcl_s); })[data.length - 1];
-    var ratioCwHx = totalHx > 0 ? (totalCw / totalHx).toFixed(2) : '∞';
+    // 🔧 控比% = 创维 / 三家合计
+    var ratioPct = total > 0 ? (totalCw / total * 100).toFixed(1) : '—';
 
     var stance = [], problem = [], result = [];
 
     stance.push('98吋+ 市场合计 <span class="hi">'+ total +'台</span>，创维 <span class="hi">'+ totalCw +'</span> vs 海信 <span class="hi-blue">'+ totalHx +'</span> vs TCL <span class="hi-orange">'+ totalTcl +'</span>');
-    stance.push('创维 / 海信控比 <span class="hi">'+ ratioCwHx +'x</span>');
+    stance.push('创维控比 <span class="hi">'+ ratioPct +'%</span>');
     stance.push('最大单市场 <span class="hi-blue">'+ big.branch +'</span>（合计 ' + (big.cw_s+big.hx_s+big.tcl_s) + ' 台）');
 
-    // 🔧 ratio < 1 说明创维落后，必须提醒
-    if (+ratioCwHx < 1 && totalHx > 0) {
-      problem.push('98吋+ 创维 <span class="hi">'+ totalCw +'</span> 台 < 海信 <span class="hi-blue">'+ totalHx +'</span> 台，控比仅 <span class="hi">'+ ratioCwHx +'x</span>，大屏失守');
+    // 🔧 创维落后海信 → 控比不足 40% 算失守
+    if (total > 0 && totalCw / total < 0.4 && totalHx > totalCw) {
+      problem.push('98吋+ 创维 <span class="hi">'+ totalCw +'</span> 台 < 海信 <span class="hi-blue">'+ totalHx +'</span> 台，控比仅 <span class="hi">'+ ratioPct +'%</span>，大屏失守');
     }
     if (loseHx.length >= 3) {
       problem.push('海信在 <span class="hi">'+ loseHx.length +'家</span> 分公司领先：' + loseHx.map(function(r){return r.branch}).join('、'));
@@ -686,7 +692,7 @@
     if (dominate.length > 0) {
       result.push('创维控场 <span class="hi-green">'+ dominate.length +'家</span>：' + dominate.map(function(r){return r.branch}).join('、'));
     }
-    if (+ratioCwHx >= 1) result.push('总量 <span class="hi-green">领先海信</span>，控比 <span class="hi-green">'+ ratioCwHx +'x</span>');
+    if (total > 0 && totalCw / total >= 0.4) result.push('创维控比 <span class="hi-green">'+ ratioPct +'%</span>，大场优势');
 
     fillBlock('ins-98', { stance: stance, problem: problem, result: result });
   }
@@ -697,7 +703,9 @@
     var q = d.q7hData.slice();
     var qTotal = q.reduce(function(s, r) { return s + r.q7h_s; }, 0);
     var uTotal = q.reduce(function(s, r) { return s + r.u7s_s; }, 0);
-    var ratio = uTotal > 0 ? (qTotal / uTotal).toFixed(1) : '∞';
+    var totalBoth = qTotal + uTotal;
+    // 🔧 控比% = Q7H / (Q7H + U7S-PRO)
+    var ratioPct = totalBoth > 0 ? (qTotal / totalBoth * 100).toFixed(1) : '—';
     var qLead = q.filter(function(r) { return r.q7h_s > r.u7s_s; });
     var uLead = q.filter(function(r) { return r.u7s_s > r.q7h_s; });
     var qBest = q.slice().sort(function(a, b) { return b.q7h_s - a.q7h_s; })[0];
@@ -708,7 +716,7 @@
 
     var stance = [], problem = [], result = [];
 
-    stance.push('Q7H 合计 <span class="hi">'+ qTotal +'台</span> vs U7S-PRO <span class="hi-blue">'+ uTotal +'台</span>，控比 <span class="hi">'+ ratio +'x</span>');
+    stance.push('Q7H 合计 <span class="hi">'+ qTotal +'台</span> vs U7S-PRO <span class="hi-blue">'+ uTotal +'台</span>，Q7H控比 <span class="hi">'+ ratioPct +'%</span>');
     stance.push('最大战场 <span class="hi">'+ qBest.branch +'</span>（Q7H '+ qBest.q7h_s +' vs U7S-PRO '+ qBest.u7s_s +'）');
     if (topSize) stance.push('Q7H 主力尺寸 <span class="hi">'+ topSize +'吋</span>，销额 <span class="hi">'+ topSizeAmt.toFixed(1) +'万</span>');
 
@@ -723,7 +731,7 @@
     if (qLead.length > 0) {
       result.push('Q7H 压制 <span class="hi-green">'+ qLead.length +'家</span> 分公司');
     }
-    if (+ratio >= 2) result.push('全局控比 <span class="hi-green">'+ ratio +'x</span>，Q7H 产品力领先');
+    if (totalBoth > 0 && qTotal / totalBoth >= 0.6) result.push('Q7H控比 <span class="hi-green">'+ ratioPct +'%</span>，产品力领先');
 
     fillBlock('ins-q7h', { stance: stance, problem: problem, result: result });
   }
@@ -985,8 +993,10 @@
     if (allData.q7hData) {
       var q7hTotal = allData.q7hData.reduce(function(s, r) { return s + r.q7h_s; }, 0);
       var u7sTotal = allData.q7hData.reduce(function(s, r) { return s + r.u7s_s; }, 0);
-      if (u7sTotal > 0 && q7hTotal / u7sTotal >= 1.5) {
-        achieves.push('Q7H vs U7S-PRO 控比 <span class="hi-green">' + (q7hTotal/u7sTotal).toFixed(1) + 'x</span>，产品力持续领先');
+      var totalBoth = q7hTotal + u7sTotal;
+      // 🔧 控比%
+      if (totalBoth > 0 && q7hTotal / totalBoth >= 0.6) {
+        achieves.push('Q7H vs U7S-PRO 控比 <span class="hi-green">' + (q7hTotal/totalBoth*100).toFixed(1) + '%</span>，产品力持续领先');
       }
     }
     if (allData.priceBands) {
