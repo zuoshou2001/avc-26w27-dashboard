@@ -883,20 +883,28 @@
     function walk(node) {
       if (node.nodeType === 3) {
         var txt = node.nodeValue;
-        // 替换 "26W01-26W34" / "26W01 - 26W34" / "26W34" 等模式
-        if (/26W\d{2}\s*-\s*26W\d{2}/.test(txt) || /26W\d{2}/.test(txt)) {
-          // 1. 周范围 → 动态范围
+        var changed = false;
+        // 1. 周范围 → 动态范围
+        if (/26W\d{2}\s*-\s*26W\d{2}/.test(txt)) {
           txt = txt.replace(/26W\d{2}\s*-\s*26W\d{2}/g, rangeLabel);
-          // 2. 单独的旧周号（非范围里的）→ lastWeek
-          txt = txt.replace(/(?<!-)26W\d{2}(?!-)/g, function(m) {
-            // 已经被替换过的跳过
-            if (m === lastWeek || m === firstWeek) return m;
+          changed = true;
+        }
+        // 2. 单独的旧周号（非范围里的）→ lastWeek
+        if (/26W\d{2}/.test(txt)) {
+          txt = txt.replace(/26W\d{2}/g, function(m) {
+            if (m === lastWeek) return m;
             return lastWeek;
           });
-          node.nodeValue = txt;
+          changed = true;
         }
+        // 3. 硬编码周数（"30周" / "44周" 里的数字 → 实际周数）
+        var weekCount = weeks.length;
+        if (/\d+周/.test(txt)) {
+          txt = txt.replace(/\d+周/g, weekCount + '周');
+          changed = true;
+        }
+        if (changed) node.nodeValue = txt;
       } else if (node.nodeType === 1) {
-        // 跳过 script/style
         if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') return;
         for (var i = 0; i < node.childNodes.length; i++) walk(node.childNodes[i]);
       }
