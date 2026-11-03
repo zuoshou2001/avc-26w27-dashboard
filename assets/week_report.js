@@ -694,7 +694,8 @@
     if (dominate.length > 0) {
       result.push('创维控场 <span class="hi-green">'+ dominate.length +'家</span>：' + dominate.map(function(r){return r.branch}).join('、'));
     }
-    if (total > 0 && totalCw / total >= 0.4) result.push('创维控比 <span class="hi-green">'+ ratioPct +'%</span>，大场优势');
+    // 控比 >= 35% 算优势（ratioPct 已经是百分比）
+    if (parseFloat(ratioPct) >= 35) result.push('创维行业控比 <span class="hi-green">'+ ratioPct +'%</span>，大屏阵地稳固');
 
     fillBlock('ins-98', { stance: stance, problem: problem, result: result });
   }
