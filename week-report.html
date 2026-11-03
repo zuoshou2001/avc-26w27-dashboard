@@ -252,6 +252,27 @@ td.cum-bar { position: relative; min-width: 70px; }
 .insight-card h4 { font-size: var(--font-sm); color: var(--accent); margin-bottom: var(--space-xs); font-weight: 700; }
 .insight-card p { font-size: var(--font-sm); color: var(--ink); line-height: 1.6; }
 
+/* ==================== 三色块洞察面板（图片风格）==================== */
+.block-panel { border-radius: var(--radius-md); padding: 14px 18px; margin: 10px 0; }
+.block-panel.stance { background: #fff5f5; border-left: 4px solid var(--accent); }
+.block-panel.problem { background: #fff7ed; border-left: 4px solid var(--orange); }
+.block-panel.result { background: #f0fdf4; border-left: 4px solid var(--green); }
+.block-panel h3 { font-size: var(--font-xs); font-weight: 700; letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase; }
+.block-panel.stance h3 { color: var(--accent); }
+.block-panel.problem h3 { color: var(--orange); }
+.block-panel.result h3 { color: var(--green); }
+.block-panel .blines { list-style: none; padding: 0; margin: 0; }
+.block-panel .blines li { font-size: var(--font-sm); color: var(--ink); line-height: 1.65; padding: 3px 0 3px 14px; position: relative; }
+.block-panel .blines li::before { content: '●'; position: absolute; left: 0; font-size: 0.55rem; top: 10px; color: var(--muted); }
+.block-panel.stance .blines li::before { color: var(--accent); }
+.block-panel.problem .blines li::before { color: var(--orange); }
+.block-panel.result .blines li::before { color: var(--green); }
+.block-panel .blines li .hi { color: var(--accent); font-weight: 700; }
+.block-panel .blines li .hi-green { color: var(--green); font-weight: 700; }
+.block-panel .blines li .hi-blue { color: var(--blue); font-weight: 700; }
+.block-panel .blines li .hi-orange { color: var(--orange); font-weight: 700; }
+.block-panel .blines li .hi-muted { color: var(--muted); }
+
 /* ==================== 自动生成的 Insight ==================== */
 .auto-insights .problem-list, .auto-insights .suggest-list { margin: var(--space-xs) 0 0 var(--space-lg); padding: 0; }
 .auto-insights .problem-list li { font-size: var(--font-sm); color: var(--accent); margin: 4px 0; line-height: 1.55; }
@@ -399,7 +420,12 @@ footer {
   </div>
 
   <!-- 模块2 自动点评 -->
-  <div class="insight-card"><h4>📊 品牌格局点评</h4><p id="ins-brand">加载中...</p></div>
+  <div class="insight-card" style="border-left-width:0;background:transparent;padding:0">
+    <h4 style="border-left:3px solid var(--accent);padding-left:8px;margin-bottom:8px">📊 品牌格局点评</h4>
+    <div class="block-panel stance"><h3>📈 态势</h3><ul class="blines" id="ins-brand-stance"><li>加载中...</li></ul></div>
+    <div class="block-panel problem"><h3>⚠️ 核心问题</h3><ul class="blines" id="ins-brand-problem"><li>加载中...</li></ul></div>
+    <div class="block-panel result"><h3>✅ 成果亮点</h3><ul class="blines" id="ins-brand-result"><li>加载中...</li></ul></div>
+  </div>
 </div>
 
 <!-- ===== 模块3: 分公司三指标切换表 ===== -->
@@ -430,7 +456,12 @@ footer {
   </figure>
 
   <!-- 模块3 自动点评 -->
-  <div class="insight-card"><h4>🏢 分公司态势点评</h4><p id="ins-branch">加载中...</p></div>
+  <div class="insight-card" style="border-left-width:0;background:transparent;padding:0">
+    <h4 style="border-left:3px solid var(--accent);padding-left:8px;margin-bottom:8px">🏢 分公司态势点评</h4>
+    <div class="block-panel stance"><h3>📈 态势</h3><ul class="blines" id="ins-branch-stance"><li>加载中...</li></ul></div>
+    <div class="block-panel problem"><h3>⚠️ 核心问题</h3><ul class="blines" id="ins-branch-problem"><li>加载中...</li></ul></div>
+    <div class="block-panel result"><h3>✅ 成果亮点</h3><ul class="blines" id="ins-branch-result"><li>加载中...</li></ul></div>
+  </div>
 </div>
 
 <!-- ===== 模块4: TOP40 型号明细 ===== -->
@@ -454,7 +485,12 @@ footer {
   </div>
 
   <!-- 模块4 自动点评 -->
-  <div class="insight-card"><h4>🏆 TOP40 型号点评</h4><p id="ins-top40">加载中...</p></div>
+  <div class="insight-card" style="border-left-width:0;background:transparent;padding:0">
+    <h4 style="border-left:3px solid var(--accent);padding-left:8px;margin-bottom:8px">🏆 TOP40 型号点评</h4>
+    <div class="block-panel stance"><h3>📈 态势</h3><ul class="blines" id="ins-top40-stance"><li>加载中...</li></ul></div>
+    <div class="block-panel problem"><h3>⚠️ 核心问题</h3><ul class="blines" id="ins-top40-problem"><li>加载中...</li></ul></div>
+    <div class="block-panel result"><h3>✅ 成果亮点</h3><ul class="blines" id="ins-top40-result"><li>加载中...</li></ul></div>
+  </div>
 </div>
 
 <!-- ===== 模块5: 价格段结构 ===== -->
@@ -483,7 +519,12 @@ footer {
   </div>
 
   <!-- 模块5 自动点评 -->
-  <div class="insight-card"><h4>💰 价格段点评</h4><p id="ins-price">加载中...</p></div>
+  <div class="insight-card" style="border-left-width:0;background:transparent;padding:0">
+    <h4 style="border-left:3px solid var(--accent);padding-left:8px;margin-bottom:8px">💰 价格段点评</h4>
+    <div class="block-panel stance"><h3>📈 态势</h3><ul class="blines" id="ins-price-stance"><li>加载中...</li></ul></div>
+    <div class="block-panel problem"><h3>⚠️ 核心问题</h3><ul class="blines" id="ins-price-problem"><li>加载中...</li></ul></div>
+    <div class="block-panel result"><h3>✅ 成果亮点</h3><ul class="blines" id="ins-price-result"><li>加载中...</li></ul></div>
+  </div>
 </div>
 
 <!-- ===== 模块6: 尺寸段结构 ===== -->
@@ -516,7 +557,12 @@ footer {
   </div>
 
   <!-- 模块6 自动点评 -->
-  <div class="insight-card"><h4>📐 尺寸段点评</h4><p id="ins-size">加载中...</p></div>
+  <div class="insight-card" style="border-left-width:0;background:transparent;padding:0">
+    <h4 style="border-left:3px solid var(--accent);padding-left:8px;margin-bottom:8px">📐 尺寸段点评</h4>
+    <div class="block-panel stance"><h3>📈 态势</h3><ul class="blines" id="ins-size-stance"><li>加载中...</li></ul></div>
+    <div class="block-panel problem"><h3>⚠️ 核心问题</h3><ul class="blines" id="ins-size-problem"><li>加载中...</li></ul></div>
+    <div class="block-panel result"><h3>✅ 成果亮点</h3><ul class="blines" id="ins-size-result"><li>加载中...</li></ul></div>
+  </div>
 </div>
 
 <!-- ===== 模块7: 98吋+ & 百吋专项 ===== -->
@@ -545,7 +591,12 @@ footer {
   </div>
 
   <!-- 模块7 自动点评 -->
-  <div class="insight-card"><h4>🖥️ 98吋+ 专项点评</h4><p id="ins-98">加载中...</p></div>
+  <div class="insight-card" style="border-left-width:0;background:transparent;padding:0">
+    <h4 style="border-left:3px solid var(--accent);padding-left:8px;margin-bottom:8px">🖥️ 98吋+ 专项点评</h4>
+    <div class="block-panel stance"><h3>📈 态势</h3><ul class="blines" id="ins-98-stance"><li>加载中...</li></ul></div>
+    <div class="block-panel problem"><h3>⚠️ 核心问题</h3><ul class="blines" id="ins-98-problem"><li>加载中...</li></ul></div>
+    <div class="block-panel result"><h3>✅ 成果亮点</h3><ul class="blines" id="ins-98-result"><li>加载中...</li></ul></div>
+  </div>
 </div>
 
 <!-- ===== 模块8: Q7H 专项 ===== -->
@@ -581,7 +632,12 @@ footer {
   </div>
 
   <!-- 模块8 自动点评 -->
-  <div class="insight-card"><h4>🎯 Q7H 专项点评</h4><p id="ins-q7h">加载中...</p></div>
+  <div class="insight-card" style="border-left-width:0;background:transparent;padding:0">
+    <h4 style="border-left:3px solid var(--accent);padding-left:8px;margin-bottom:8px">🎯 Q7H 专项点评</h4>
+    <div class="block-panel stance"><h3>📈 态势</h3><ul class="blines" id="ins-q7h-stance"><li>加载中...</li></ul></div>
+    <div class="block-panel problem"><h3>⚠️ 核心问题</h3><ul class="blines" id="ins-q7h-problem"><li>加载中...</li></ul></div>
+    <div class="block-panel result"><h3>✅ 成果亮点</h3><ul class="blines" id="ins-q7h-result"><li>加载中...</li></ul></div>
+  </div>
 </div>
 
 <!-- ===== 模块9: 结论与建议（自动生成）===== -->
@@ -591,14 +647,9 @@ footer {
     <span class="badge">自动生成</span>
   </div>
 
-  <div class="insight-card">
-    <h4>⚠️ 主要问题</h4>
-    <ol class="problem-list" id="insight-problems"></ol>
-  </div>
-  <div class="insight-card" style="border-left-color:var(--blue)">
-    <h4>📋 行动建议</h4>
-    <ol class="suggest-list" id="insight-suggestions"></ol>
-  </div>
+  <div class="block-panel stance"><h3>📈 本周核心态势</h3><ul class="blines" id="exec-stance"><li>加载中...</li></ul></div>
+  <div class="block-panel problem"><h3>⚠️ 优先解决的问题</h3><ul class="blines" id="exec-problem"><li>加载中...</li></ul></div>
+  <div class="block-panel result"><h3>✅ 优先行动建议</h3><ul class="blines" id="exec-result"><li>加载中...</li></ul></div>
 </div>
 
 </div><!-- /container -->
