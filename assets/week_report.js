@@ -1399,30 +1399,32 @@
   }
 
   /* ========== 主渲染 ========== */
+  // 🔧 2026-11-03 每个函数加 try-catch，单个崩溃不影响其他模块
+  function safe(fn, name) {
+    try { fn(); } catch(e) { console.error('❌ [' + name + '] 渲染失败:', e.message); console.error(e.stack); }
+  }
   function renderAll() {
     disposeCharts();
     var d = getData();
     if (!d) { console.warn('week_report: 无法获取数据', currentKey, currentBranch); return; }
-    updateHeader();
-    renderKPIs(d);
-    renderBrand(d);
-    renderBranch(d);
-    renderTop40(d);
-    renderPriceBands(d);
-    renderSizeSegs(d);
-    renderSize98(d);
-    renderQ7H(d);
-    // 各模块自动点评
-    renderInsBrand(d);
-    renderInsBranch(d);
-    renderInsTop40(d);
-    renderInsPrice(d);
-    renderInsSize(d);
-    renderIns98(d);
-    renderInsQ7H(d);
-    // 新增两大板块
-    renderNewProductTable(d);
-    renderAchieveAndIssue(d);
+    safe(function(){ updateHeader(); }, 'updateHeader');
+    safe(function(){ renderKPIs(d); }, 'renderKPIs');
+    safe(function(){ renderBrand(d); }, 'renderBrand');
+    safe(function(){ renderBranch(d); }, 'renderBranch');
+    safe(function(){ renderTop40(d); }, 'renderTop40');
+    safe(function(){ renderPriceBands(d); }, 'renderPriceBands');
+    safe(function(){ renderSizeSegs(d); }, 'renderSizeSegs');
+    safe(function(){ renderSize98(d); }, 'renderSize98');
+    safe(function(){ renderQ7H(d); }, 'renderQ7H');
+    safe(function(){ renderInsBrand(d); }, 'renderInsBrand');
+    safe(function(){ renderInsBranch(d); }, 'renderInsBranch');
+    safe(function(){ renderInsTop40(d); }, 'renderInsTop40');
+    safe(function(){ renderInsPrice(d); }, 'renderInsPrice');
+    safe(function(){ renderInsSize(d); }, 'renderInsSize');
+    safe(function(){ renderIns98(d); }, 'renderIns98');
+    safe(function(){ renderInsQ7H(d); }, 'renderInsQ7H');
+    safe(function(){ renderNewProductTable(d); }, 'renderNewProductTable');
+    safe(function(){ renderAchieveAndIssue(d); }, 'renderAchieveAndIssue');
   }
 
   /* ========== 事件绑定 ========== */
