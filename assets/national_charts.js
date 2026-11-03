@@ -865,6 +865,45 @@
     }
   }
 
+  // 🔧 动态替换所有硬编码的周号范围（从 all_data.js 取最新）
+  function updateWeekLabels() {
+    if (!window.DASHBOARD_ALL || !DASHBOARD_ALL.allWeeks) return;
+    var weeks = DASHBOARD_ALL.allWeeks;
+    var firstWeek = weeks[0];
+    var lastWeek = weeks[weeks.length - 1];
+    var rangeLabel = firstWeek + '-' + lastWeek;
+
+    // 更新 title
+    var t = document.title;
+    if (t.includes('|')) {
+      document.title = t.split('|')[0].trim() + ' | ' + rangeLabel;
+    }
+
+    // 替换所有文本节点里的旧周号
+    function walk(node) {
+      if (node.nodeType === 3) {
+        var txt = node.nodeValue;
+        // 替换 "26W01-26W34" / "26W01 - 26W34" / "26W34" 等模式
+        if (/26W\d{2}\s*-\s*26W\d{2}/.test(txt) || /26W\d{2}/.test(txt)) {
+          // 1. 周范围 → 动态范围
+          txt = txt.replace(/26W\d{2}\s*-\s*26W\d{2}/g, rangeLabel);
+          // 2. 单独的旧周号（非范围里的）→ lastWeek
+          txt = txt.replace(/(?<!-)26W\d{2}(?!-)/g, function(m) {
+            // 已经被替换过的跳过
+            if (m === lastWeek || m === firstWeek) return m;
+            return lastWeek;
+          });
+          node.nodeValue = txt;
+        }
+      } else if (node.nodeType === 1) {
+        // 跳过 script/style
+        if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') return;
+        for (var i = 0; i < node.childNodes.length; i++) walk(node.childNodes[i]);
+      }
+    }
+    walk(document.body);
+  }
+
   // ===== MAIN =====
   function renderAll() {
     allCharts.forEach(function(c) { c.dispose(); });
@@ -896,6 +935,7 @@
     });
   }
 
+  updateWeekLabels();  // 🔧 先替换硬编码周号，再渲染
   renderAll();
 
   window.addEventListener('resize', function() {
