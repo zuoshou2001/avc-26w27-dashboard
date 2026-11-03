@@ -471,6 +471,11 @@
       result.push('稳居 <span class="hi-green">销额第一</span>，领先第二名 <span class="hi-green">'+ (bo[0].amount - bo[1].amount).toFixed(0) +'万</span>');
     }
 
+    // ⚠️ 补充：达成率不足 & 同比下滑 进问题（之前漏了）
+    if (t.achieve !== undefined && t.achieve < 0.95) {
+      problem.push('目标达成 <span class="hi">仅 '+ (t.achieve*100).toFixed(1) +'%</span>，未达预期');
+    }
+
     fillBlock('ins-brand', { stance: stance, problem: problem, result: result });
   }
 
@@ -492,10 +497,13 @@
 
       stance.push(currentBranch + '销额 <span class="hi">'+ target.cw.toFixed(1) +'万</span>，全区均值 <span class="hi-muted">'+ avgCw.toFixed(1) +'万</span>');
       stance.push('市占率 <span class="hi">'+ (target.cw_ms*100).toFixed(1) +'%</span>，全区第 <span class="hi">'+ rankMs +'</span> / 达成率 <span class="hi">'+ (target.achieve*100).toFixed(1) +'%</span>（第 '+ rankAch +'）');
-      stance.push('vs 海信 <span class="hi-blue">'+ (target.lead_hx >= 0 ? '+' : '') + target.lead_hx.toFixed(1) +'万</span>');
+      // 🔧 修复 -0 问题
+      var hxDiff = target.lead_hx;
+      var hxDiffStr = Math.abs(hxDiff) < 0.5 ? '基本持平' : (hxDiff >= 0 ? '+' : '') + hxDiff.toFixed(1);
+      stance.push('vs 海信 <span class="hi-blue">'+ hxDiffStr +'万</span>');
 
       if (target.achieve < 0.9) problem.push('目标达成 <span class="hi">仅 '+ (target.achieve*100).toFixed(1) +'%</span>，需重点攻坚');
-      if (target.lead_hx < 0) problem.push('落后海信 <span class="hi">'+ Math.abs(target.lead_hx).toFixed(0) +'万</span>，差距明显');
+      if (hxDiff < -0.5) problem.push('落后海信 <span class="hi">'+ Math.abs(hxDiff).toFixed(0) +'万</span>，差距明显');
       if (target.wow !== undefined && target.wow !== null && target.wow < -0.1) problem.push('环比 <span class="hi">▼ '+ (target.wow*100).toFixed(1) +'%</span>，周度下滑');
 
       if (rankCw <= 3) result.push('销额排名 <span class="hi-green">第'+ rankCw +'</span>，头部阵营');
@@ -583,24 +591,23 @@
     var pbByCw = pb.slice().sort(function(a, b) { return b.cw_share - a.cw_share; });
     var topBand = pbByHy[0];
     var best = pbByCw[0];
-    var worst = pbByCw[pbByCw.length - 1];
+    // 🔧 薄弱环节 = 行业规模主战场级别（hy_share >= 10%）且创维控比低（cw_share < 20%）
+    var weakCands = pb.filter(function(b) { return b.hy_share >= 10 && b.cw_share < 20; });
+    weakCands.sort(function(a, b) { return a.cw_share - b.cw_share; });
+    var weakest = weakCands[0];
 
     var stance = [], problem = [], result = [];
 
     stance.push('行业主战场 <span class="hi">'+ topBand.band +'</span>，销额 <span class="hi">'+ topBand.hy_amount.toFixed(0) +'万</span>，占比 <span class="hi">'+ topBand.hy_share.toFixed(1) +'%</span>');
     stance.push('创维在 <span class="hi">'+ topBand.band +'</span> 控比 <span class="hi">'+ topBand.cw_share.toFixed(1) +'%</span>');
 
-    if (worst.cw_share < best.cw_share * 0.5) {
-      problem.push('<span class="hi">'+ worst.band +'</span> 控比仅 <span class="hi">'+ worst.cw_share.toFixed(1) +'%</span>，最弱环节');
-    }
-    // 高价格段（>3万）分析
-    var hiBand = pb.find(function(b) { return b.band === '>3万'; });
-    if (hiBand && hiBand.hy_share > 15 && hiBand.cw_share < 20) {
-      problem.push('高价段 <span class="hi">>3万</span> 行业占比 <span class="hi-blue">'+ hiBand.hy_share.toFixed(1) +'%</span>，创维仅 <span class="hi">'+ hiBand.cw_share.toFixed(1) +'%</span>');
+    // 薄弱环节提醒
+    if (weakest) {
+      var gapAbs = weakest.hy_amount - weakest.cw_amount;
+      problem.push('<span class="hi">'+ weakest.band +'</span> 行业占比 <span class="hi-blue">'+ weakest.hy_share.toFixed(1) +'%</span>，创维控比仅 <span class="hi">'+ weakest.cw_share.toFixed(1) +'%</span>（差 <span class="hi">'+ gapAbs.toFixed(0) +'万</span>），最大短板');
     }
 
     result.push('<span class="hi-green">'+ best.band +'</span> 控比最高 <span class="hi-green">'+ best.cw_share.toFixed(1) +'%</span>');
-    // 各价格段控比均提升
     var avgCw = pb.reduce(function(s, r) { return s + r.cw_share; }, 0) / pb.length;
     if (avgCw > 25) result.push('全价格段平均控比 <span class="hi-green">'+ avgCw.toFixed(1) +'%</span>，整体优势');
 
@@ -663,8 +670,12 @@
     stance.push('创维 / 海信控比 <span class="hi">'+ ratioCwHx +'x</span>');
     stance.push('最大单市场 <span class="hi-blue">'+ big.branch +'</span>（合计 ' + (big.cw_s+big.hx_s+big.tcl_s) + ' 台）');
 
-    if (loseHx.length > 0) {
-      problem.push('海信在 <span class="hi">'+ loseHx.length +'家</span> 分公司领先创维：' + loseHx.map(function(r){return r.branch}).join('、'));
+    // 🔧 ratio < 1 说明创维落后，必须提醒
+    if (+ratioCwHx < 1 && totalHx > 0) {
+      problem.push('98吋+ 创维 <span class="hi">'+ totalCw +'</span> 台 < 海信 <span class="hi-blue">'+ totalHx +'</span> 台，控比仅 <span class="hi">'+ ratioCwHx +'x</span>，大屏失守');
+    }
+    if (loseHx.length >= 3) {
+      problem.push('海信在 <span class="hi">'+ loseHx.length +'家</span> 分公司领先：' + loseHx.map(function(r){return r.branch}).join('、'));
     }
     if (big.cw_s < big.hx_s) {
       problem.push('最大市场 <span class="hi-blue">'+ big.branch +'</span> 海信 <span class="hi">'+ big.hx_s +'</span> 台 > 创维 <span class="hi">'+ big.cw_s +'</span> 台，关键阵地失守');
@@ -970,14 +981,25 @@
       }
     }
     if (allData.priceBands) {
-      // 最大价格段份额提升（简化：看 top band 创维份额）
       var topBand = allData.priceBands.slice().sort(function(a, b) { return b.hy_share - a.hy_share; })[0];
       if (topBand && topBand.cw_share >= 30) achieves.push('主战场 <span class="hi-green">' + topBand.band + '</span> 控比 ' + topBand.cw_share.toFixed(1) + '%，绝对优势');
     }
 
     // ⚠️ 核心问题
+    // 🔧 Bug6: 总目标达成不足必须进 issues（之前漏了！）
+    if (t.achieve !== undefined && t.achieve < 0.95) {
+      issues.push('总目标达成 <span class="hi">仅 ' + (t.achieve*100).toFixed(1) + '%</span>，距目标线 <span class="hi-muted">' + ((t.target||0)*100).toFixed(1) + '%</span> 尚有差距');
+    }
     if (t.ms !== undefined && (t.ms_25 !== undefined) && t.ms < t.ms_25) {
-      issues.push('市占率 <span class="hi">' + (t.ms*100).toFixed(1) + '%</span>，环比 <span class="hi">▼ ' + (((t.ms_25-t.ms)/t.ms_25)*100).toFixed(1) + '%</span>，份额被蚕食');
+      issues.push('市占率 <span class="hi">' + (t.ms*100).toFixed(1) + '%</span>，较同期 <span class="hi">' + (t.ms_25*100).toFixed(1) + '%</span> 下滑 <span class="hi">' + ((t.ms_25 - t.ms)*100).toFixed(1) + 'pct</span>，份额被蚕食');
+    }
+    // 🔧 Bug3: 品牌集中度（海信+TCL 前2大品牌）才是真问题
+    if (allData.brandOverview && t.hy) {
+      var top2BrandAmt = allData.brandOverview.slice(0, 2).reduce(function(s, b) { return s + b.amount; }, 0);
+      var brandConc = top2BrandAmt / t.hy * 100;
+      if (brandConc > 45) {
+        issues.push('前2大品牌（' + allData.brandOverview.slice(0,2).map(function(b){return b.brand}).join('+') + '）集中度 <span class="hi">' + brandConc.toFixed(1) + '%</span>，创维面临双强夹击');
+      }
     }
     if (allData.msData) {
       // 销额落后海信最多的分公司
@@ -995,16 +1017,16 @@
       if (u7Lead.length > 0) issues.push('U7S-PRO 在 <span class="hi">' + u7Lead.length + '家</span> 反超 Q7H');
     }
     if (allData.priceBands) {
-      var worstBand = allData.priceBands.slice().sort(function(a, b) { return a.cw_share - b.cw_share; })[0];
-      if (worstBand && worstBand.cw_share < 15) issues.push('<span class="hi">' + worstBand.band + '</span> 控比仅 <span class="hi">' + worstBand.cw_share.toFixed(1) + '%</span>，薄弱环节');
+      // 和 renderInsPrice 保持一致：主战场级别(hy>=10%) + 创维控比低
+      var weakCands2 = allData.priceBands.filter(function(b) { return b.hy_share >= 10 && b.cw_share < 20; });
+      weakCands2.sort(function(a, b) { return a.cw_share - b.cw_share; });
+      var worstBand = weakCands2[0];
+      if (worstBand) issues.push('<span class="hi">' + worstBand.band + '</span> 行业占比 ' + worstBand.hy_share.toFixed(1) + '%，创维控比仅 <span class="hi">' + worstBand.cw_share.toFixed(1) + '%</span>，薄弱环节');
     }
     if (allData.top40) {
-      // 头部品牌集中度 = top2 型号占总行业销额比例
-      if (t.hy !== undefined && t.hy > 0) {
-        var top2Amt = allData.top40.slice(0, 2).reduce(function(s, r) { return s + r.amount; }, 0);
-        var conc = top2Amt / t.hy * 100;
-        if (conc > 20) issues.push('TOP2 型号集中度 <span class="hi">' + conc.toFixed(1) + '%</span>，头部风险集中');
-      }
+      // 补充：TOP40 中国有多少个创维型号
+      var cwInTop40 = allData.top40.filter(function(r) { return r.brand === '创维'; }).length;
+      if (cwInTop40 <= 5) issues.push('创维仅 <span class="hi">' + cwInTop40 + '</span> 型号进入 TOP40，头部产品断层');
     }
 
     achieveEl.innerHTML = achieves.length > 0
