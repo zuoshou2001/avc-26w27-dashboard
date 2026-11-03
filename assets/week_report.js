@@ -781,6 +781,115 @@
     fillBlock('exec', { stance: stance, problem: problems, result: suggestions });
   }
 
+  /* ========== 导出长图 ========== */
+  function exportFullReport() {
+    if (typeof html2canvas === 'undefined') { alert('html2canvas 未加载，请检查网络'); return; }
+    var btn = document.getElementById('export-screenshot');
+    if (!btn) return;
+
+    btn.textContent = '⏳ 生成中...';
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+
+    // Step 0: 隐藏 UI 元素
+    var hiddenEls = [];
+    var origStyles = [];
+    function hide(el) {
+      if (el) { hiddenEls.push(el); origStyles.push(el.style.display); el.style.display = 'none'; }
+    }
+    hide(document.querySelector('.nav-bar'));
+    hide(btn);
+    var footer = document.querySelector('footer');
+    if (footer) { hiddenEls.push(footer); origStyles.push(footer.style.display); footer.style.display = 'none'; }
+
+    // Step 1: 展开表格容器
+    var tableWraps = document.querySelectorAll('.table-wrap');
+    var wrapOrig = [];
+    tableWraps.forEach(function(tw) {
+      wrapOrig.push({ el: tw, mh: tw.style.maxHeight, ov: tw.style.overflow, oy: tw.style.overflowY });
+      tw.style.maxHeight = 'none'; tw.style.overflow = 'visible'; tw.style.overflowY = 'visible';
+    });
+
+    // Step 2: 白底
+    var body = document.body;
+    var origBg = body.style.background;
+    body.style.background = '#ffffff';
+
+    // Step 3: ECharts → 图片
+    var chartParents = [];
+    allCharts.forEach(function(chart) {
+      var dom = chart.getDom();
+      if (dom && dom.parentNode) {
+        var dataUrl = chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#fff' });
+        var img = document.createElement('img');
+        img.src = dataUrl;
+        img.style.width = dom.style.width || dom.offsetWidth + 'px';
+        img.style.height = dom.style.height || dom.offsetHeight + 'px';
+        img.style.display = 'block';
+        chartParents.push({ parent: dom.parentNode, original: dom, img: img });
+        dom.parentNode.replaceChild(img, dom);
+      }
+    });
+
+    // Step 4: html2canvas 截取
+    setTimeout(function() {
+      var pageH = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      var dynScale = Math.min(2, Math.max(0.5, 16000 / pageH));
+      html2canvas(document.body, {
+        useCORS: true,
+        scale: dynScale,
+        backgroundColor: '#ffffff',
+        logging: false,
+        windowWidth: document.body.scrollWidth,
+        windowHeight: pageH,
+        height: pageH
+      }).then(function(canvas) {
+        // 恢复图表
+        chartParents.forEach(function(p) { p.parent.replaceChild(p.original, p.img); });
+        allCharts.forEach(function(c) { try { c.dispose(); } catch(e) {} });
+        allCharts = [];
+        chartParents.forEach(function(p) {
+          var c = echarts.init(p.original, null, { renderer: 'svg' });
+          allCharts.push(c);
+        });
+        renderAll();
+
+        // 恢复 UI
+        hiddenEls.forEach(function(el, i) { el.style.display = origStyles[i]; });
+        wrapOrig.forEach(function(s) { s.el.style.maxHeight = s.mh; s.el.style.overflow = s.ov; s.el.style.overflowY = s.oy; });
+        body.style.background = origBg;
+
+        // 下载
+        var ts = new Date().toISOString().slice(0,10);
+        var link = document.createElement('a');
+        link.download = '创维电视周报_' + (currentBranch === '南部全部' ? '全区' : currentBranch) + '_' + currentKey + '_' + ts + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        btn.textContent = '📷 导出长图';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }).catch(function(err) {
+        chartParents.forEach(function(p) { p.parent.replaceChild(p.original, p.img); });
+        allCharts.forEach(function(c) { try { c.dispose(); } catch(e) {} });
+        allCharts = [];
+        chartParents.forEach(function(p) {
+          var c = echarts.init(p.original, null, { renderer: 'svg' });
+          allCharts.push(c);
+        });
+        renderAll();
+        hiddenEls.forEach(function(el, i) { el.style.display = origStyles[i]; });
+        wrapOrig.forEach(function(s) { s.el.style.maxHeight = s.mh; s.el.style.overflow = s.ov; s.el.style.overflowY = s.oy; });
+        body.style.background = origBg;
+        btn.textContent = '📷 导出长图';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        console.error('Screenshot failed:', err);
+        alert('导出失败，请重试');
+      });
+    }, 600);
+  }
+
   /* ========== 主渲染 ========== */
   function renderAll() {
     disposeCharts();
@@ -850,6 +959,10 @@
   window.addEventListener('resize', function() {
     allCharts.forEach(function(c) { try { c.resize(); } catch(e) {} });
   });
+
+  // 导出长图按钮
+  var exportBtn = document.getElementById('export-screenshot');
+  if (exportBtn) exportBtn.addEventListener('click', exportFullReport);
 
   // 初始渲染
   if (window.DASHBOARD_ALL) {
