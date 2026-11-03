@@ -864,10 +864,9 @@
       var avgP = it.avg_price;
       // 基础模板：品牌定位 + 均价 + 环比 + 竞品对标
       var parts = [];
-      // 1. 周龄提示
+      // 1. NEW 标记（首次上榜）
       if (age === 0) parts.push('本周首次上榜');
-      else if (age !== null && age <= 4) parts.push('仅上市 ' + age + ' 周');
-      else if (age !== null && age <= 10) parts.push('上市 ' + age + ' 周');
+      else if (age !== null && age <= 4) parts.push('新近机型（上市 ' + age + ' 周）');
 
       // 2. 环比
       if (wow !== null && wow !== undefined) {
@@ -922,12 +921,13 @@
     var rowsHtml = rows.map(function(r, idx) {
       var it = r.item;
       var bc = brandClass(it.brand);
-      // 🔧 同时显示周龄 + 首次出现的周号
+      // 🔧 上市时间 = 首次出现的周号
       var firstWeek = firstSeenMap[it.brand + '|' + it.model];
-      var firstLabel = firstWeek ? '<span style="font-size:0.68rem;color:var(--muted);display:block">' + firstWeek + '</span>' : '';
-      var ageHtml = r.age === null ? '<span class="hi-muted">—</span>' + firstLabel :
-        (r.age === 0 ? '<span class="age-new">NEW</span>' + firstLabel :
-         (r.age <= 4 ? '<span class="age-new">' + r.age + '周</span>' + firstLabel : r.age + '周' + firstLabel));
+      var ageHtml = firstWeek
+        ? (firstWeek === curWeek
+            ? '<span class="age-new">NEW ' + firstWeek + '</span>'
+            : firstWeek)
+        : '<span class="hi-muted">—</span>';
       var wowHtml = it.wow_sales !== null && it.wow_sales !== undefined && it.wow_sales > 0
         ? ' <span class="hi-green">▲+' + (it.wow_sales*100).toFixed(0) + '%</span>'
         : (it.wow_sales !== null && it.wow_sales !== undefined && it.wow_sales < 0
