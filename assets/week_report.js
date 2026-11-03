@@ -1244,11 +1244,9 @@
     renderInsSize(d);
     renderIns98(d);
     renderInsQ7H(d);
-    generateInsights(d);
-    // 新增三大板块
+    // 新增两大板块
     renderNewProductTable(d);
     renderAchieveAndIssue(d);
-    renderActionCards(d);
   }
 
   /* ========== 事件绑定 ========== */
