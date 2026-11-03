@@ -781,6 +781,338 @@
     fillBlock('exec', { stance: stance, problem: problems, result: suggestions });
   }
 
+  /* ========== 工具：firstSeenMap 构建 ========== */
+  var _firstSeenMap = null;
+  var _weeksOrder = null;
+  function getFirstSeenMap() {
+    if (_firstSeenMap) return _firstSeenMap;
+    _firstSeenMap = {};
+    if (!window.DASHBOARD_ALL || !DASHBOARD_ALL.allWeeks) return _firstSeenMap;
+    _weeksOrder = DASHBOARD_ALL.allWeeks.slice();
+    var allData = DASHBOARD_ALL.data || {};
+    _weeksOrder.forEach(function(w) {
+      var t40 = allData[w] && allData[w].top40;
+      if (!t40) return;
+      t40.forEach(function(item) {
+        var key = item.brand + '|' + item.model;
+        if (!_firstSeenMap[key]) _firstSeenMap[key] = w;
+      });
+    });
+    return _firstSeenMap;
+  }
+  function getModelAge(brand, model, curWeek) {
+    var map = getFirstSeenMap();
+    var key = brand + '|' + model;
+    var first = map[key];
+    if (!first) return null;
+    if (!_weeksOrder) getFirstSeenMap();
+    var fi = _weeksOrder.indexOf(first);
+    var ci = _weeksOrder.indexOf(curWeek);
+    if (fi < 0 || ci < 0) return 0;
+    return ci - fi;
+  }
+
+  /* ========== 模块10: 竞品新品情报 ========== */
+  function renderNewProductTable(d) {
+    var tbody = document.getElementById('newprod-tbody');
+    var foot = document.getElementById('newprod-foot');
+    if (!tbody) return;
+    if (!d || !d.top40) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">暂无数据</td></tr>'; if(foot) foot.innerHTML=''; return; }
+
+    var firstSeenMap = getFirstSeenMap();
+    var curWeek = currentKey;
+
+    // 在 top40 基础上按"上市周龄"标记新品：age ≤ 8 视为新品
+    var labeled = d.top40.map(function(item) {
+      var age = getModelAge(item.brand, item.model, curWeek);
+      return { item: item, age: age, isNew: age !== null && age <= 8 };
+    });
+
+    // 按累计销额降序排，取前 18 行（让表格不会太长）
+    labeled.sort(function(a, b) { return b.item.amount - a.item.amount; });
+    var rows = labeled.slice(0, 18);
+
+    // 品牌 class
+    function brandClass(brand) {
+      var b = brand.toLowerCase();
+      if (b === '创维') return 'cw';
+      if (b === '海信') return 'hx';
+      if (b === 'tcl') return 'tcl';
+      if (b.indexOf('三星') >= 0 || b.indexOf('samsung') >= 0) return 'samsung';
+      if (b.indexOf('索尼') >= 0 || b.indexOf('sony') >= 0) return 'sony';
+      return 'other';
+    }
+    // 解读生成（6 种模板组合）
+    function makeRead(r) {
+      var it = r.item;
+      var age = r.age;
+      var brand = it.brand;
+      var wow = it.wow_sales;
+      var avgP = it.avg_price;
+      // 基础模板：品牌定位 + 均价 + 环比 + 竞品对标
+      var parts = [];
+      // 1. 周龄提示
+      if (age === 0) parts.push('本周首次上榜');
+      else if (age !== null && age <= 4) parts.push('仅上市 ' + age + ' 周');
+      else if (age !== null && age <= 10) parts.push('上市 ' + age + ' 周');
+
+      // 2. 环比
+      if (wow !== null && wow !== undefined) {
+        var wowPct = (wow * 100).toFixed(1);
+        if (wow >= 0.5) parts.push('<span class="hi-green">环比大幅增 ' + wowPct + '%</span>');
+        else if (wow >= 0.1) parts.push('环比 <span class="hi-green">+' + wowPct + '%</span>');
+        else if (wow <= -0.3) parts.push('环比 <span class="hi">▼ ' + Math.abs(wowPct) + '%</span>');
+      }
+
+      // 3. 均价带 + 价位定位
+      var avgKw = '';
+      if (avgP > 25000) avgKw = '高端';
+      else if (avgP > 15000) avgKw = '中高端';
+      else if (avgP > 10000) avgKw = '中端';
+      else if (avgP > 7000) avgKw = '入门';
+      else avgKw = '低价';
+
+      // 4. 竞品对标
+      var comp = '';
+      if (brand === '创维') {
+        // 创维 → 对标海信同尺寸
+        var sameSize = d.top40.find(function(x) { return x.brand === '海信' && x.size === it.size && x.model !== it.model; });
+        if (sameSize) {
+          comp = '；对标海信 ' + sameSize.model + '（<span class="hi-blue">' + sameSize.avg_price.toFixed(0) + '</span>）';
+          if (avgP < sameSize.avg_price) comp += '，价格更亲民';
+          else if (avgP > sameSize.avg_price) comp += '，偏高 <span class="hi">'+ ((avgP - sameSize.avg_price)/sameSize.avg_price*100).toFixed(0) +'%</span>';
+        }
+      } else {
+        // 竞品 → 对标创维同尺寸
+        var cwSameSize = d.top40.find(function(x) { return x.brand === '创维' && x.size === it.size; });
+        if (cwSameSize) {
+          comp = '；对打创维 ' + cwSameSize.model;
+          if (avgP > cwSameSize.avg_price) comp += '（<span class="hi-blue">高 ' + ((avgP - cwSameSize.avg_price)/cwSameSize.avg_price*100).toFixed(0) + '%</span>）';
+        }
+      }
+
+      // 5. 销额带
+      var amtKw = '';
+      if (it.amount >= 80) amtKw = '<span class="hi">头部爆款</span>';
+      else if (it.amount >= 40) amtKw = '<span class="hi-blue">主力型号</span>';
+      else if (it.amount >= 15) amtKw = '<span class="hi-muted">中腰部</span>';
+      else amtKw = '<span class="hi-muted">尾部</span>';
+
+      var readStr = parts.join('，');
+      if (readStr) readStr += '。';
+      readStr += amtKw + '，均价 <span class="hi-num">' + avgP.toFixed(0) + '</span>（' + avgKw + '档）';
+      readStr += comp;
+      return readStr;
+    }
+
+    // 渲染
+    var rowsHtml = rows.map(function(r, idx) {
+      var it = r.item;
+      var bc = brandClass(it.brand);
+      var ageHtml = r.age === null ? '<span class="hi-muted">—</span>' :
+        (r.age === 0 ? '<span class="age-new">NEW</span>' :
+         (r.age <= 4 ? '<span class="age-new">' + r.age + '周</span>' : r.age + '周'));
+      var wowHtml = it.wow_sales !== null && it.wow_sales !== undefined && it.wow_sales > 0
+        ? ' <span class="hi-green">▲+' + (it.wow_sales*100).toFixed(0) + '%</span>'
+        : (it.wow_sales !== null && it.wow_sales !== undefined && it.wow_sales < 0
+          ? ' <span class="hi">▼' + Math.abs(it.wow_sales*100).toFixed(0) + '%</span>' : '');
+      return '<tr>' +
+        '<td class="brand-cell ' + bc + '"><span class="bchip">' + it.brand + '</span></td>' +
+        '<td class="model-cell">' + it.model + '</td>' +
+        '<td class="launch-cell">' + ageHtml + '</td>' +
+        '<td class="num" style="text-align:right">' + it.sales + '台' + wowHtml + '</td>' +
+        '<td class="num" style="text-align:right">' + it.amount.toFixed(1) + '万</td>' +
+        '<td class="read">' + makeRead(r) + '</td>' +
+      '</tr>';
+    }).join('');
+    tbody.innerHTML = rowsHtml;
+
+    // 底部汇总文字
+    var cwCount = rows.filter(function(r) { return r.item.brand === '创维'; }).length;
+    var hxCount = rows.filter(function(r) { return r.item.brand === '海信'; }).length;
+    var tclCount = rows.filter(function(r) { return r.item.brand === 'TCL'; }).length;
+    var newCnt = rows.filter(function(r) { return r.isNew; }).length;
+    var footHtml = '<span class="hi-kw">新品效率对比：</span>TOP20 中创维 <span class="hi-num">' + cwCount + '款</span>、海信 ' + hxCount + '款、TCL ' + tclCount + '款；' +
+      '<span class="hi-kw">本周期内新品</span>（上市 ≤8 周）共 <span class="hi-num">' + newCnt + '款</span>，' +
+      '创维新品数量 ' + (rows.filter(function(r) { return r.isNew && r.item.brand === '创维'; }).length) + '款。';
+    foot.innerHTML = footHtml;
+  }
+
+  /* ========== 模块11: 成果与问题 ========== */
+  function renderAchieveAndIssue(d) {
+    var achieveEl = document.getElementById('achieve-list');
+    var issueEl = document.getElementById('issue-list');
+    if (!achieveEl || !issueEl) return;
+    var allData = getAllData();
+    if (!allData) return;
+
+    var achieves = [], issues = [];
+    var t = allData.totals || {};
+
+    // ✅ 成果
+    if (t.achieve >= 1.0) {
+      achieves.push('目标达成 <span class="hi-green">' + (t.achieve*100).toFixed(1) + '%</span>，超额完成目标线 <span class="hi-muted">' + ((t.target||0)*100).toFixed(1) + '%</span>');
+    }
+    if (t.yoy !== undefined && t.yoy > 0) {
+      achieves.push('创维销额 <span class="hi-green">同比 +' + (t.yoy*100).toFixed(1) + '%</span>，行业增长正循环');
+    }
+    if (allData.msData) {
+      var overAch = allData.msData.filter(function(r) { return r.achieve >= 1.05; });
+      if (overAch.length > 0) achieves.push('<span class="hi-green">' + overAch.length + '家</span> 分公司达成率 ≥ 105%：' + overAch.slice(0,4).map(function(r){return r.branch}).join('、') + (overAch.length>4?'等':''));
+      var leadHx = allData.msData.filter(function(r) { return r.lead_hx >= 0; });
+      if (leadHx.length > 0) achieves.push('领先海信 <span class="hi-green">' + leadHx.length + '家</span> 分公司');
+    }
+    if (allData.q7hData) {
+      var q7hTotal = allData.q7hData.reduce(function(s, r) { return s + r.q7h_s; }, 0);
+      var u7sTotal = allData.q7hData.reduce(function(s, r) { return s + r.u7s_s; }, 0);
+      if (u7sTotal > 0 && q7hTotal / u7sTotal >= 1.5) {
+        achieves.push('Q7H vs U7S-PRO 控比 <span class="hi-green">' + (q7hTotal/u7sTotal).toFixed(1) + 'x</span>，产品力持续领先');
+      }
+    }
+    if (allData.priceBands) {
+      // 最大价格段份额提升（简化：看 top band 创维份额）
+      var topBand = allData.priceBands.slice().sort(function(a, b) { return b.hy_share - a.hy_share; })[0];
+      if (topBand && topBand.cw_share >= 30) achieves.push('主战场 <span class="hi-green">' + topBand.band + '</span> 控比 ' + topBand.cw_share.toFixed(1) + '%，绝对优势');
+    }
+
+    // ⚠️ 核心问题
+    if (t.ms !== undefined && (t.ms_25 !== undefined) && t.ms < t.ms_25) {
+      issues.push('市占率 <span class="hi">' + (t.ms*100).toFixed(1) + '%</span>，环比 <span class="hi">▼ ' + (((t.ms_25-t.ms)/t.ms_25)*100).toFixed(1) + '%</span>，份额被蚕食');
+    }
+    if (allData.msData) {
+      // 销额落后海信最多的分公司
+      var lagHx = allData.msData.slice().sort(function(a, b) { return a.lead_hx - b.lead_hx; })[0];
+      if (lagHx && lagHx.lead_hx < -30) issues.push(lagHx.branch + ' 落后海信 <span class="hi">' + Math.abs(lagHx.lead_hx).toFixed(0) + '万</span>，差距严重');
+      // 达成率最低
+      var lowAch = allData.msData.slice().sort(function(a, b) { return a.achieve - b.achieve; })[0];
+      if (lowAch && lowAch.achieve < 0.92) issues.push(lowAch.branch + ' 目标达成仅 <span class="hi">' + (lowAch.achieve*100).toFixed(1) + '%</span>');
+      // 下滑分公司
+      var wowNeg = allData.msData.filter(function(r) { return r.wow !== undefined && r.wow !== null && r.wow < -0.1; });
+      if (wowNeg.length >= 2) issues.push('<span class="hi">' + wowNeg.length + '家</span> 分公司环比下滑超 10%');
+    }
+    if (allData.q7hData) {
+      var u7Lead = allData.q7hData.filter(function(r) { return r.u7s_s > r.q7h_s && r.u7s_s >= 5; });
+      if (u7Lead.length > 0) issues.push('U7S-PRO 在 <span class="hi">' + u7Lead.length + '家</span> 反超 Q7H');
+    }
+    if (allData.priceBands) {
+      var worstBand = allData.priceBands.slice().sort(function(a, b) { return a.cw_share - b.cw_share; })[0];
+      if (worstBand && worstBand.cw_share < 15) issues.push('<span class="hi">' + worstBand.band + '</span> 控比仅 <span class="hi">' + worstBand.cw_share.toFixed(1) + '%</span>，薄弱环节');
+    }
+    if (allData.top40) {
+      // 头部品牌集中度 = top2 型号占总行业销额比例
+      if (t.hy !== undefined && t.hy > 0) {
+        var top2Amt = allData.top40.slice(0, 2).reduce(function(s, r) { return s + r.amount; }, 0);
+        var conc = top2Amt / t.hy * 100;
+        if (conc > 20) issues.push('TOP2 型号集中度 <span class="hi">' + conc.toFixed(1) + '%</span>，头部风险集中');
+      }
+    }
+
+    achieveEl.innerHTML = achieves.length > 0
+      ? achieves.map(function(x) { return '<li>' + x + '</li>'; }).join('')
+      : '<li style="color:var(--muted)">本周暂无突出亮点</li>';
+    issueEl.innerHTML = issues.length > 0
+      ? issues.map(function(x) { return '<li>' + x + '</li>'; }).join('')
+      : '<li style="color:var(--green)">本周无重大问题</li>';
+  }
+
+  /* ========== 模块12: 下阶段行动建议 ========== */
+  function renderActionCards(d) {
+    var wrap = document.getElementById('action-cards');
+    if (!wrap) return;
+    var allData = getAllData();
+    if (!allData) return;
+
+    var cards = [];
+    var t = allData.totals || {};
+
+    // 1. 高达成分公司继续保持 / 低达成重点攻坚
+    if (allData.msData) {
+      var lowAchList = allData.msData.filter(function(r) { return r.achieve < 0.95; }).slice().sort(function(a, b) { return a.achieve - b.achieve; });
+      if (lowAchList.length > 0) {
+        var worst3 = lowAchList.slice(0, 3);
+        cards.push({
+          title: '<span class="hi">重点攻坚</span> ' + worst3.map(function(r){return r.branch}).join('、') + ' 分公司',
+          meta: '<span class="kw-tag">优先级</span>达成率最低 ' + worst3.map(function(r){return r.branch + ' ' + (r.achieve*100).toFixed(0) + '%'}).join(' / ') + '，建议 Q7H + 大屏产品定向促销'
+        });
+      }
+    }
+
+    // 2. 落后海信分公司反超
+    if (allData.msData) {
+      var lagHxList = allData.msData.filter(function(r) { return r.lead_hx < -20; }).slice().sort(function(a, b) { return a.lead_hx - b.lead_hx; });
+      if (lagHxList.length > 0) {
+        cards.push({
+          title: '<span class="hi-blue">反超海信</span> ' + lagHxList.length + '家落后分公司',
+          meta: '<span class="kw-tag">竞品对标</span>最大缺口 ' + lagHxList[0].branch + '（差距 ' + Math.abs(lagHxList[0].lead_hx).toFixed(0) + '万），建议 85吋+ 大屏定向发力'
+        });
+      }
+    }
+
+    // 3. 薄弱价格段补强
+    if (allData.priceBands) {
+      var worstBand = allData.priceBands.slice().sort(function(a, b) { return a.cw_share - b.cw_share; })[0];
+      if (worstBand && worstBand.cw_share < 20) {
+        cards.push({
+          title: '<span class="hi-orange">补强</span> ' + worstBand.band + ' 价格段',
+          meta: '<span class="kw-tag">产品</span>创维控比仅 ' + worstBand.cw_share.toFixed(1) + '%，行业占比 ' + worstBand.hy_share.toFixed(1) + '%，建议针对性布局'
+        });
+      }
+    }
+
+    // 4. 主战场价格段加强
+    if (allData.priceBands) {
+      var topBand = allData.priceBands.slice().sort(function(a, b) { return b.hy_share - a.hy_share; })[0];
+      if (topBand) {
+        cards.push({
+          title: '<span class="hi-green">巩固</span> ' + topBand.band + ' 主战场优势',
+          meta: '<span class="kw-tag">市场</span>行业占比 ' + topBand.hy_share.toFixed(1) + '%，创维控比 ' + topBand.cw_share.toFixed(1) + '%，建议加大渠道推力'
+        });
+      }
+    }
+
+    // 5. Q7H 反超 U7S-PRO 的分公司加强
+    if (allData.q7hData) {
+      var u7LeadList = allData.q7hData.filter(function(r) { return r.u7s_s > r.q7h_s; });
+      if (u7LeadList.length > 0) {
+        cards.push({
+          title: '<span class="hi">Q7H 控场</span> ' + u7LeadList.length + '家被 U7S-PRO 反超的分公司',
+          meta: '<span class="kw-tag">产品力</span>' + u7LeadList.slice(0, 3).map(function(r){return r.branch + ' U7S ' + r.u7s_s + '台'}).join(' / ') + '，建议 Q7H 加强终端主推'
+        });
+      }
+    }
+
+    // 6. 新品上市跟进
+    var firstSeenMap = getFirstSeenMap();
+    var curWeek = currentKey;
+    if (d && d.top40) {
+      var newThisWeek = d.top40.filter(function(x) { return getModelAge(x.brand, x.model, curWeek) === 0; });
+      var newCw = newThisWeek.filter(function(x) { return x.brand === '创维'; });
+      if (newCw.length >= 2) {
+        cards.push({
+          title: '<span class="hi-green">新品</span> ' + newCw.length + ' 款本周首上榜型号跟踪',
+          meta: '<span class="kw-tag">新品效率</span>' + newCw.map(function(x){return x.model}).join(' / ') + '，建议持续观察环比走势'
+        });
+      }
+    }
+
+    // 保证至少 4 张卡
+    if (cards.length < 4 && allData.msData) {
+      cards.push({
+        title: '<span class="hi">持续复盘</span> 每周各分公司环比同比数据',
+        meta: '<span class="kw-tag">节奏</span>及时介入下滑严重分公司，确保达成率稳步推进'
+      });
+    }
+
+    var html = cards.map(function(c, i) {
+      return '<div class="action-card">' +
+        '<div class="action-num">' + (i+1) + '</div>' +
+        '<div class="action-title">' + c.title + '</div>' +
+        '<div class="action-meta">' + c.meta + '</div>' +
+      '</div>';
+    }).join('');
+    wrap.innerHTML = html;
+  }
+
   /* ========== 导出长图 ========== */
   function exportFullReport() {
     if (typeof html2canvas === 'undefined') { alert('html2canvas 未加载，请检查网络'); return; }
@@ -913,6 +1245,10 @@
     renderIns98(d);
     renderInsQ7H(d);
     generateInsights(d);
+    // 新增三大板块
+    renderNewProductTable(d);
+    renderAchieveAndIssue(d);
+    renderActionCards(d);
   }
 
   /* ========== 事件绑定 ========== */

@@ -417,6 +417,124 @@ td.cum-bar { position: relative; min-width: 80px; }
 .trend-up { color: var(--green); font-weight: 700; }
 .trend-down { color: var(--accent); font-weight: 700; }
 
+/* ==================== 竞品新品情报 ==================== */
+#newprod-table { font-size: var(--font-sm); }
+#newprod-table tbody td { padding: 11px 16px; }
+#newprod-table td.model-cell { font-weight: 600; color: var(--ink); letter-spacing: 0.01em; }
+#newprod-table td.brand-cell .bchip {
+  display: inline-block; padding: 3px 10px; border-radius: var(--radius-pill);
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.02em;
+}
+#newprod-table td.brand-cell.cw .bchip { background: rgba(230,57,70,0.1); color: var(--accent); }
+#newprod-table td.brand-cell.hx .bchip { background: rgba(37,99,235,0.1); color: var(--blue); }
+#newprod-table td.brand-cell.tcl .bchip { background: rgba(234,88,12,0.1); color: var(--orange); }
+#newprod-table td.brand-cell.samsung .bchip { background: rgba(124,58,237,0.1); color: var(--purple); }
+#newprod-table td.brand-cell.sony .bchip { background: rgba(13,148,136,0.1); color: var(--teal); }
+#newprod-table td.brand-cell.other .bchip { background: #f1f5f9; color: #64748b; }
+
+#newprod-table td.launch-cell { text-align: center; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.75rem; }
+#newprod-table td.launch-cell.age-new { color: var(--accent); font-weight: 700; }
+#newprod-table td.num { font-variant-numeric: tabular-nums; font-weight: 600; }
+#newprod-table td.read { font-size: var(--font-sm); line-height: 1.7; color: var(--ink-soft); max-width: 380px; }
+#newprod-table td.read .hi-num { color: var(--accent); font-weight: 700; }
+#newprod-table td.read .hi-blue { color: var(--blue); font-weight: 600; }
+#newprod-table td.read .hi-green { color: var(--green); font-weight: 600; }
+#newprod-table td.read .hi-muted { color: var(--muted); font-weight: 500; }
+
+.newprod-foot {
+  margin-top: 14px; padding: 14px 18px;
+  background: linear-gradient(135deg, #fafbfc, #f4f6fb);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm); color: var(--ink-soft); line-height: 1.75;
+  border: 1px solid var(--rule-soft);
+}
+.newprod-foot .hi-kw { color: var(--accent); font-weight: 700; }
+.newprod-foot .hi-num { color: var(--accent); font-weight: 700; }
+
+/* ==================== 成果与问题 双栏 ==================== */
+.result-q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); }
+.result-card {
+  border-radius: var(--radius-lg); padding: var(--space-lg);
+  border: 1px solid var(--rule-soft);
+  transition: box-shadow 0.2s;
+}
+.result-card:hover { box-shadow: var(--shadow-sm); }
+.result-card.green {
+  background: linear-gradient(135deg, #f0fdf4 0%, #fafefb 100%);
+  border-color: rgba(22,163,74,0.15);
+}
+.result-card.red {
+  background: linear-gradient(135deg, #fff5f5 0%, #fffafa 100%);
+  border-color: rgba(230,57,70,0.15);
+}
+.result-card-head {
+  font-size: var(--font-md); font-weight: 800; letter-spacing: 0.02em;
+  padding-bottom: var(--space-md); margin-bottom: var(--space-md);
+  border-bottom: 2px dashed var(--rule);
+}
+.result-card-head.green-h { color: var(--green); border-color: rgba(22,163,74,0.25); }
+.result-card-head.red-h { color: var(--accent); border-color: rgba(230,57,70,0.25); }
+.result-card-list { list-style: none; padding: 0; margin: 0; }
+.result-card-list li {
+  font-size: var(--font-sm); line-height: 1.8; color: var(--ink);
+  padding: 6px 0 6px 24px; position: relative;
+  border-bottom: 1px dashed rgba(226,232,240,0.4);
+}
+.result-card-list li:last-child { border-bottom: none; }
+.result-card-list li::before {
+  content: ''; position: absolute; left: 6px; top: 14px;
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.result-card.green .result-card-list li::before { background: var(--green); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+.result-card.red .result-card-list li::before { background: var(--accent); box-shadow: 0 0 0 3px rgba(230,57,70,0.15); }
+.result-card-list li .hi { font-weight: 700; color: var(--accent); }
+.result-card.green .result-card-list li .hi-green { font-weight: 700; color: var(--green); }
+.result-card.red .result-card-list li .hi { font-weight: 700; color: var(--accent); }
+
+/* ==================== 下阶段行动建议 ==================== */
+.action-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: var(--space-md); }
+.action-card {
+  background: var(--bg); border-radius: var(--radius-lg); padding: var(--space-lg);
+  border: 1px solid var(--rule-soft); position: relative; overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.action-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--grad-accent);
+}
+.action-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.action-num {
+  position: absolute; top: 14px; right: 16px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, #e63946, #ff6b6b);
+  color: #fff; font-size: 0.8rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(230,57,70,0.35);
+}
+.action-title {
+  font-size: var(--font-md); font-weight: 700; color: var(--ink);
+  line-height: 1.5; padding-right: 40px;
+}
+.action-title .hi { color: var(--accent); font-weight: 800; }
+.action-title .hi-blue { color: var(--blue); font-weight: 700; }
+.action-title .hi-green { color: var(--green); font-weight: 700; }
+.action-title .hi-orange { color: var(--orange); font-weight: 700; }
+.action-meta {
+  margin-top: var(--space-sm);
+  font-size: var(--font-xs); color: var(--muted); line-height: 1.6;
+}
+.action-meta .kw-tag {
+  display: inline-block; padding: 1px 8px; border-radius: 4px;
+  background: rgba(13,148,136,0.1); color: var(--teal);
+  font-weight: 600; font-size: 0.68rem; margin-right: 4px;
+}
+
+@media (max-width: 768px) {
+  .result-q-grid { grid-template-columns: 1fr; }
+  .action-cards { grid-template-columns: 1fr; }
+  #newprod-table td.read { max-width: none; }
+}
+
 /* ==================== Footer ==================== */
 footer {
   padding: var(--space-2xl) var(--space-lg);
@@ -795,6 +913,57 @@ footer {
   <div class="block-panel result"><h3>✅ 优先行动建议</h3><ul class="blines" id="exec-result"><li>加载中...</li></ul></div>
 </div>
 
+<!-- ===== 模块10: 竞品新品情报 ===== -->
+<div class="section">
+  <div class="section-header">
+    <h2>九、竞品新品情报</h2>
+    <span class="badge">自动生成</span>
+  </div>
+  <div class="table-wrap" id="newprod-table-wrap">
+    <table id="newprod-table">
+      <thead>
+        <tr>
+          <th style="width:14%;text-align:center">品牌</th>
+          <th style="width:22%;text-align:left;padding-left:16px">型号</th>
+          <th style="width:10%;text-align:center">上市周</th>
+          <th style="width:14%;text-align:right">累计销量</th>
+          <th style="width:14%;text-align:right">累计销额</th>
+          <th style="text-align:left;padding-left:16px">解读</th>
+        </tr>
+      </thead>
+      <tbody id="newprod-tbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">加载中...</td></tr></tbody>
+    </table>
+  </div>
+  <div class="newprod-foot" id="newprod-foot"></div>
+</div>
+
+<!-- ===== 模块11: 成果与问题 ===== -->
+<div class="section">
+  <div class="section-header">
+    <h2>十、成果与问题</h2>
+    <span class="badge" style="background:linear-gradient(135deg,#16a34a,#15803d)">自动生成</span>
+  </div>
+  <div class="result-q-grid">
+    <div class="result-card green">
+      <div class="result-card-head green-h">✅ 本周成果</div>
+      <ul class="result-card-list" id="achieve-list"><li>加载中...</li></ul>
+    </div>
+    <div class="result-card red">
+      <div class="result-card-head red-h">⚠️ 核心问题</div>
+      <ul class="result-card-list" id="issue-list"><li>加载中...</li></ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 模块12: 下阶段行动建议 ===== -->
+<div class="section">
+  <div class="section-header">
+    <h2>十一、下阶段行动建议</h2>
+    <span class="badge" style="background:linear-gradient(135deg,#0d9488,#0f766e)">自动生成</span>
+  </div>
+  <div class="action-cards" id="action-cards"><div style="padding:30px;color:var(--muted);text-align:center">加载中...</div></div>
+</div>
+
 </div><!-- /container -->
 
 <footer style="padding:24px;font-size:0.78rem;color:var(--muted);text-align:center;border-top:1px solid var(--rule);margin-top:24px">
@@ -804,6 +973,6 @@ footer {
 <script src="assets/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="assets/all_data.js?v=46"></script>
-<script src="assets/week_report.js?v=48"></script>
+<script src="assets/week_report.js?v=49"></script>
 </body>
 </html>
