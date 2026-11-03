@@ -198,21 +198,21 @@
       cumAmt += r.amount; cumSales += r.sales;
       var bTag = r.brand === '创维' ? 'tag-red' : r.brand === '海信' ? 'tag-blue' : r.brand === 'TCL' ? 'tag-yellow' : 'tag-gray';
       var cumPct = totalAmount > 0 ? cumAmt / totalAmount * 100 : 0;
-      var wowHtml = r.wow_sales !== null ?
+      var wowHtml = r.wow_sales !== null && r.wow_sales !== undefined ?
         '<span class="' + (r.wow_sales >= 0 ? 'trend-up' : 'trend-down') + '">' +
-        (r.wow_sales >= 0 ? '▲ +' : '▼ ') + (r.wow_sales*100).toFixed(1) + '%</span>' : '-';
+        (r.wow_sales >= 0 ? '▲ +' : '▼ ') + (r.wow_sales*100).toFixed(1) + '%</span>' : '<span class="hi-muted">—</span>';
 
       html += '<tr>';
       html += '<td class="rank">' + (i+1) + '</td>';
       html += '<td><span class="tag ' + bTag + '">' + r.brand + '</span></td>';
       html += '<td><strong>' + r.model + '</strong></td>';
-      html += '<td>' + (r.size || '-') + '</td>';
-      html += '<td class="num">' + r.sales + '</td>';
-      html += '<td class="num">' + totalSales > 0 ? ((r.sales/totalSales*100).toFixed(1) + '%') : '-</td>';
-      html += '<td class="num"><strong>' + r.amount.toFixed(2) + '</strong></td>';
-      html += '<td class="num">' + totalAmount > 0 ? ((r.amount/totalAmount*100).toFixed(1) + '%') : '-</td>';
+      html += '<td>' + (r.size || '<span class="hi-muted">—</span>') + '</td>';
+      html += '<td class="num">' + (r.sales != null ? r.sales : '<span class="hi-muted">—</span>') + '</td>';
+      html += '<td class="num">' + (totalSales > 0 ? ((r.sales/totalSales*100).toFixed(1) + '%') : '<span class="hi-muted">—</span>') + '</td>';
+      html += '<td class="num"><strong>' + (r.amount != null ? r.amount.toFixed(2) : '<span class="hi-muted">—</span>') + '</strong></td>';
+      html += '<td class="num">' + (totalAmount > 0 ? ((r.amount/totalAmount*100).toFixed(1) + '%') : '<span class="hi-muted">—</span>') + '</td>';
       html += '<td class="cum-bar"><div class="cum-fill"><div style="width:' + cumPct + '%"></div></div><span style="font-size:0.72rem;color:var(--muted);margin-left:4px">' + cumPct.toFixed(1) + '%</span></td>';
-      html += '<td class="num">¥' + r.avg_price.toLocaleString() + '</td>';
+      html += '<td class="num">' + (r.avg_price != null && r.avg_price > 0 ? '¥' + r.avg_price.toLocaleString() : '<span class="hi-muted">—</span>') + '</td>';
       html += '<td class="num">' + wowHtml + '</td>';
       html += '</tr>';
     });
