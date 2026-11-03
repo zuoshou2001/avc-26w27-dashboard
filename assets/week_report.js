@@ -147,19 +147,19 @@
     // 表格
     var html = '';
     ms.forEach(function(r, i) {
-      var wowStr = r.wow !== undefined && r.wow !== null ?
-        '<span style="color:' + (r.wow >= 0 ? 'var(--green)' : 'var(--accent)') + '">' + (r.wow >= 0 ? '+' : '') + (r.wow*100).toFixed(1) + '%</span>' : '-';
-      var yoyStr = r.yoy !== undefined && r.yoy !== null ?
-        '<span style="color:' + (r.yoy >= 0 ? 'var(--green)' : 'var(--accent)') + '">' + (r.yoy >= 0 ? '+' : '') + (r.yoy*100).toFixed(1) + '%</span>' : '-';
+      var wowHtml = r.wow !== undefined && r.wow !== null ?
+        '<span class="' + (r.wow >= 0 ? 'trend-up' : 'trend-down') + '">' + (r.wow >= 0 ? '+' : '') + (r.wow*100).toFixed(1) + '%</span>' : '-';
+      var yoyHtml = r.yoy !== undefined && r.yoy !== null ?
+        '<span class="' + (r.yoy >= 0 ? 'trend-up' : 'trend-down') + '">' + (r.yoy >= 0 ? '+' : '') + (r.yoy*100).toFixed(1) + '%</span>' : '-';
       var achTag = r.achieve >= 1.0 ? 'tag-green' : r.achieve >= 0.9 ? 'tag-yellow' : 'tag-red';
       html += '<tr><td class="rank">' + (i+1) + '</td><td><strong>' + r.branch + '</strong></td>';
       html += '<td class="num">' + r.cw.toFixed(2) + '万</td>';
       html += '<td class="num">' + (r.cw_ms*100).toFixed(1) + '%</td>';
       html += '<td class="num">' + (r.target*100).toFixed(1) + '%</td>';
       html += '<td class="num"><span class="tag ' + achTag + '">' + (r.achieve*100).toFixed(1) + '%</span></td>';
-      html += '<td class="num">' + wowStr + '</td><td class="num">' + yoyStr + '</td>';
-      var gapCls = r.lead_hx >= 0 ? 'var(--green)' : 'var(--accent)';
-      html += '<td class="num" style="color:' + gapCls + '">' + (r.lead_hx >= 0 ? '+' : '') + r.lead_hx.toFixed(1) + '</td></tr>';
+      html += '<td class="num">' + wowHtml + '</td><td class="num">' + yoyHtml + '</td>';
+      var gapCls = r.lead_hx >= 0 ? 'trend-up' : 'trend-down';
+      html += '<td class="num ' + gapCls + '">' + (r.lead_hx >= 0 ? '+' : '') + r.lead_hx.toFixed(1) + '</td></tr>';
     });
     document.getElementById('branch-table-body').innerHTML = html;
 
@@ -197,8 +197,9 @@
     list.forEach(function(r, i) {
       cumAmt += r.amount; cumSales += r.sales;
       var bTag = r.brand === '创维' ? 'tag-red' : r.brand === '海信' ? 'tag-blue' : r.brand === 'TCL' ? 'tag-yellow' : 'tag-gray';
-      var wowStr = r.wow_sales !== null ?
-        '<span style="color:' + (r.wow_sales >= 0 ? 'var(--green)' : 'var(--accent)') + '">' +
+      var cumPct = totalAmount > 0 ? cumAmt / totalAmount * 100 : 0;
+      var wowHtml = r.wow_sales !== null ?
+        '<span class="' + (r.wow_sales >= 0 ? 'trend-up' : 'trend-down') + '">' +
         (r.wow_sales >= 0 ? '▲ +' : '▼ ') + (r.wow_sales*100).toFixed(1) + '%</span>' : '-';
 
       html += '<tr>';
@@ -210,9 +211,9 @@
       html += '<td class="num">' + totalSales > 0 ? ((r.sales/totalSales*100).toFixed(1) + '%') : '-</td>';
       html += '<td class="num"><strong>' + r.amount.toFixed(2) + '</strong></td>';
       html += '<td class="num">' + totalAmount > 0 ? ((r.amount/totalAmount*100).toFixed(1) + '%') : '-</td>';
-      html += '<td class="num">' + totalAmount > 0 ? ((cumAmt/totalAmount*100).toFixed(1) + '%') : '-</td>';
+      html += '<td class="cum-bar"><div class="cum-fill"><div style="width:' + cumPct + '%"></div></div><span style="font-size:0.72rem;color:var(--muted);margin-left:4px">' + cumPct.toFixed(1) + '%</span></td>';
       html += '<td class="num">¥' + r.avg_price.toLocaleString() + '</td>';
-      html += '<td class="num">' + wowStr + '</td>';
+      html += '<td class="num">' + wowHtml + '</td>';
       html += '</tr>';
     });
     document.getElementById('top40-table-body').innerHTML = html;
@@ -251,7 +252,7 @@
       html += '<td class="num">' + r.cw_share.toFixed(1) + '%</td>';
       html += '<td class="num">' + r.hy_sales + '</td><td class="num">' + r.hy_amount.toFixed(2) + '</td>';
       html += '<td class="num">' + r.hy_share.toFixed(1) + '%</td>';
-      html += '<td class="num" style="color:' + (avgDiff >= 0 ? 'var(--green)' : 'var(--accent)') + '">' + (avgDiff >= 0 ? '+' : '') + avgDiff.toFixed(1) + '%</td></tr>';
+      html += '<td class="num ' + (avgDiff >= 0 ? 'trend-up' : 'trend-down') + '">' + (avgDiff >= 0 ? '+' : '') + avgDiff.toFixed(1) + '%</td></tr>';
     });
     document.getElementById('price-table-body').innerHTML = html;
   }
