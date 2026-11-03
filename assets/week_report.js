@@ -1399,9 +1399,14 @@
   }
 
   /* ========== 主渲染 ========== */
-  // 🔧 2026-11-03 每个函数加 try-catch，单个崩溃不影响其他模块
+  // 🔧 2026-11-03 每个函数加 try-catch，错误同时渲染到页面 #debug-errors 方便无 DevTools 查看
   function safe(fn, name) {
-    try { fn(); } catch(e) { console.error('❌ [' + name + '] 渲染失败:', e.message); console.error(e.stack); }
+    try { fn(); } catch(e) {
+      console.error('❌ [' + name + '] 渲染失败:', e.message);
+      console.error(e.stack);
+      var dbg = document.getElementById('debug-errors');
+      if (dbg) dbg.innerHTML += '<div style="color:#d32f2f;padding:6px 10px;margin:4px 0;background:#ffebee;border-left:3px solid #d32f2f;font:12px/1.5 monospace;"><b>❌ ' + name + '</b>: ' + e.message + '</div>';
+    }
   }
   function renderAll() {
     disposeCharts();
